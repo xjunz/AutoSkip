@@ -6,7 +6,7 @@ plugins {
 }
 hiddenApiRefine {
     // Prefix to remove, default is ['$']
-    refinePrefix = ['Hidden']
+    refinePrefix = ['$']
     // Print log, default is true
     log = true
 }
@@ -29,7 +29,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    buildFeatures{
+    buildFeatures {
         dataBinding true
     }
     compileOptions {

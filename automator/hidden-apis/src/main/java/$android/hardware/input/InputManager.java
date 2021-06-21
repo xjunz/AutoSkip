@@ -1,8 +1,8 @@
-package android.hardware.input;
+package $android.hardware.input;
 
 import android.view.InputEvent;
 
-public final class HiddenInputManager {
+public final class InputManager {
     /**
      * Input Event Injection Synchronization Mode: None.
      * Never blocks.  Injection is asynchronous and is assumed always to be successful.
@@ -24,7 +24,7 @@ public final class HiddenInputManager {
      */
     public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH = 2;  // see InputDispatcher.h
 
-    public static HiddenInputManager getInstance() {
+    public static InputManager getInstance() {
         throw new RuntimeException("Stub!");
     }
 
