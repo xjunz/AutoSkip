@@ -1,6 +1,7 @@
 package top.xjunz.library.automator.impl
 
 import android.app.IActivityManager
+import android.app.UiAutomation
 import android.content.ComponentName
 import android.content.Context
 import android.hardware.input.IInputManager
