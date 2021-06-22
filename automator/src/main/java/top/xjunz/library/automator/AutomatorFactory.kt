@@ -1,6 +1,7 @@
 package top.xjunz.library.automator
 
 import top.xjunz.library.automator.impl.RootAutomator
+import top.xjunz.library.automator.impl.ShizukuAutomator
 
 /**
  * A factory entity, which provides an [Automator]'s instance according to the [Mode] passed in.
@@ -20,7 +21,7 @@ class AutomatorFactory {
             when (mode) {
                 Mode.ACCESSIBILITY -> TODO()
                 Mode.ROOT -> RootAutomator.INSTANCE
-                Mode.SHIZUKU -> TODO()
+                Mode.SHIZUKU -> ShizukuAutomator.INSTANCE
             }
     }
 }

@@ -1,6 +1,7 @@
 package top.xjunz.library.automator.impl
 
 import `$android`.hardware.input.InputManager
+import android.content.ComponentName
 import android.os.SystemClock
 import android.view.InputEvent
 import android.view.MotionEvent
@@ -19,7 +20,23 @@ open class RootAutomator private constructor() : Automator() {
         val event = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
             MotionEvent.ACTION_DOWN, x, y, 0)
         event.source = InputDeviceCompat.SOURCE_TOUCHSCREEN
-        inputManager.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH)
+       // inputManager.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH)
         event.recycle()
+    }
+
+    override fun performActionUp(x: Float, y: Float) {
+        TODO("Not yet implemented")
+    }
+
+    override fun performActionDown(x: Float, y: Float) {
+        TODO("Not yet implemented")
+    }
+
+    override fun injectInputEvent(event: InputEvent, mode: Int): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun getForegroundComponentName(): ComponentName? {
+        TODO("Not yet implemented")
     }
 }

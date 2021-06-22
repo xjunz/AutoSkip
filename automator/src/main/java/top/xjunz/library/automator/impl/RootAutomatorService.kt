@@ -4,12 +4,11 @@ import `$android`.hardware.input.InputManager
 import android.os.Build
 import android.os.Looper
 import android.view.InputEvent
-import top.xjunz.library.automator.IRootAutomatorService
 
 /**
  * @author xjunz 2021/6/21
  */
-class RootAutomatorService : IRootAutomatorService.Stub() {
+class RootAutomatorService  {
     companion object {
         val DEBUG_ARGS by lazy {
             val sdk = Build.VERSION.SDK_INT
@@ -43,5 +42,5 @@ class RootAutomatorService : IRootAutomatorService.Stub() {
                 " --nice-name=root_automator top.xjunz.automator.ServiceLauncher"
     }
 
-    override fun injectInputEvent(event: InputEvent?, mode: Int) = InputManager.getInstance().injectInputEvent(event, mode)
+     fun injectInputEvent(event: InputEvent?, mode: Int) = InputManager.getInstance().injectInputEvent(event, mode)
 }
