@@ -172,4 +172,11 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction().add(R.id.root, TestFragment())
             .addToBackStack("test").commit()
     }
+
+    fun shutdownService(view: View) {
+        automatorService?.run {
+            disconnect()
+            shutdown()
+        }
+    }
 }

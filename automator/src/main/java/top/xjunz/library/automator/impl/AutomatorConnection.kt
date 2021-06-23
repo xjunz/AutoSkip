@@ -2,10 +2,10 @@ package top.xjunz.library.automator.impl
 
 import `$android`.app.UiAutomation
 import `$android`.app.UiAutomationConnection
-import `$android`.hardware.input.InputManager
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.os.Handler
 import android.os.HandlerThread
 import android.os.Process
 import android.os.SystemClock
@@ -14,7 +14,6 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import rikka.shizuku.Shizuku
 import top.xjunz.library.automator.IAutomatorConnection
 import top.xjunz.library.automator.IOnAccessibilityEventListener
 import java.util.*
@@ -32,10 +31,13 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     }
 
     private val mHandlerThread = HandlerThread(HANDLER_THREAD_NAME)
-
+    private val handler by lazy {
+        Handler(mHandlerThread.looper)
+    }
     private lateinit var mUiAutomation: UiAutomation
 
     override fun connect() {
+        Log.i(TAG, "v9")
         check(!mHandlerThread.isAlive) { "Already connected!" }
         mHandlerThread.start()
         mUiAutomation = UiAutomation(mHandlerThread.looper, UiAutomationConnection())
@@ -43,28 +45,36 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         startMonitor()
     }
 
-    private var lastEvent: AccessibilityEvent? = null
+    private var lastHandledNodeInfo: AccessibilityNodeInfo? = null
+    private var lastHandleTimestamp = 0L;
     private fun startMonitor() {
         mUiAutomation.serviceInfo = AccessibilityServiceInfo().apply {
             eventTypes = AccessibilityEvent.TYPE_WINDOWS_CHANGED or AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
             flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS or AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
         }
-        mUiAutomation.setOnAccessibilityEventListener {
-            if (Objects.equals(it, lastEvent)) {
+        mUiAutomation.setOnAccessibilityEventListener { event ->
+            if (event == null) {
                 return@setOnAccessibilityEventListener
             }
-            lastEvent = it
+            if (event.packageName?.startsWith("com.android") == true) {
+                return@setOnAccessibilityEventListener
+            }
             val windowInfo = mUiAutomation.rootInActiveWindow ?: return@setOnAccessibilityEventListener
             windowInfo.findAccessibilityNodeInfosByText("跳过")?.forEach { node ->
-                Log.i("automator", node.toString())
+                Log.i(TAG,"duration: ${System.currentTimeMillis() - lastHandleTimestamp}")
+                Log.i(TAG,"last: $lastHandledNodeInfo cur: $node, equal?: ${Objects.equals(lastHandledNodeInfo, node)}")
+                if (System.currentTimeMillis() - lastHandleTimestamp < 500 && Objects.equals(lastHandledNodeInfo, node)) {
+                    return@forEach
+                }
                 val text = node.text
                 if (text.contains(Regex("\\d"))) {
                     if (node.isClickable) {
-                        Log.i("automator", "Skipped!")
+                        Log.i(TAG, node.toString())
+                        Log.i(TAG, "Skipped!")
                         node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                    } else {
-                        //fallback
-                        Log.i("automator", "Fallback!")
+                    } else { //fallback
+                        Log.i(TAG, node.toString())
+                        Log.i(TAG, "Fallback!")
                         val downTime = SystemClock.uptimeMillis()
                         val rect = Rect()
                         node.getBoundsInScreen(rect)
@@ -76,14 +86,15 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
                         upAction.recycle()
                         downAction.recycle()
                     }
+                    lastHandledNodeInfo = node
+                    lastHandleTimestamp = System.currentTimeMillis()
                 }
             }
         }
     }
 
     override fun disconnect() {
-        check(mHandlerThread.isAlive) { "Already disconnected!" }
-        mUiAutomation.disconnect()
+        check(mHandlerThread.isAlive) { "Already disconnected!" } // mUiAutomation.disconnect()
         mHandlerThread.quit()
     }
 
@@ -91,8 +102,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
 
     override fun shutdown() = exitProcess(0)
 
-    override fun setOnAccessibilityEventListener(client: IOnAccessibilityEventListener?) =
-        mUiAutomation.setOnAccessibilityEventListener { event -> client!!.onAccessibilityEvent(event) }
+    override fun setOnAccessibilityEventListener(client: IOnAccessibilityEventListener?) = mUiAutomation.setOnAccessibilityEventListener { event -> client!!.onAccessibilityEvent(event) }
 
     override fun sayHello() = "Hello from remote server! My uid is ${Process.myUid()}"
 

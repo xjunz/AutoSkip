@@ -25,6 +25,12 @@
                 android:onClick="showTestPage"
                 android:text="Test" />
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="shutdownService"
+                android:text="Shutdown" />
+
             <TextView
                 android:id="@+id/tv_output"
                 android:layout_width="wrap_content"

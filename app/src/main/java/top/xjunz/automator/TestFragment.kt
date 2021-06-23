@@ -61,7 +61,7 @@ class TestFragment : Fragment() {
                 false
             }
         }
-        handler.postDelayed(countDownTask, 1000)
+        //handler.postDelayed(countDownTask, 1000)
     }
 
     fun skip() {
