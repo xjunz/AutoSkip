@@ -2,6 +2,7 @@ package $android.hardware.input;
 
 import android.view.InputEvent;
 
+@SuppressWarnings("unused")
 public final class InputManager {
     /**
      * Input Event Injection Synchronization Mode: None.

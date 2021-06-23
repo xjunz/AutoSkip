@@ -9,6 +9,7 @@ import android.view.InputEvent;
 /**
  * @author xjunz 2021/6/22
  */
+@SuppressWarnings("unused")
 public interface IInputManager extends IInterface {
     boolean injectInputEvent(InputEvent event, int mode) throws RemoteException;
 

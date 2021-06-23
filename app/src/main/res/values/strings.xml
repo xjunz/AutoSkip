@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">自动点击</string>
+    <string name="skip_in_seconds">跳过 %s 秒</string>
 </resources>

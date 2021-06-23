@@ -10,6 +10,7 @@ import java.util.List;
 /**
  * @author xjunz 2021/6/22
  */
+@SuppressWarnings("unused")
 public interface IActivityManager extends IInterface {
     List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses() throws RemoteException;
 
