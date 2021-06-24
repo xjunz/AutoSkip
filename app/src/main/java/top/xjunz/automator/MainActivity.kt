@@ -61,10 +61,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun init() {
         Shizuku.addBinderReceivedListenerSticky {
-            binding.tvOutput.text = "Binder received!"
+            //binding.tvOutput.text = "Binder received!"
         }
         Shizuku.addBinderDeadListener {
-            binding.tvOutput.text = "Binder dead!"
+            //binding.tvOutput.text = "Binder dead!"
         }
         /*when (Shizuku.checkRemotePermission("android.permission.REAL_GET_TASKS")) {
             PackageManager.PERMISSION_GRANTED -> {
@@ -136,11 +136,11 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     res.append("invalid binder for ").append(name).append(" received")
                 }
-                binding.tvOutput.text = res.toString()
+               // binding.tvOutput.text = res.toString()
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
-                binding.tvOutput.text = "${name?.flattenToString() ?: "Remote service"} died!"
+               // binding.tvOutput.text = "${name?.flattenToString() ?: "Remote service"} died!"
             }
         }
     }

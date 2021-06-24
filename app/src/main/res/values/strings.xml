@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">自动点击</string>
     <string name="skip_in_seconds">跳过 %s 秒</string>
+    <string name="activate_via_shizuku">使用<b> Shizuku </b>激活</string>
+    <string name="intro_to_shizuku">本服务需要Shizuku的授权才能正常使用。Shizuku是一个开源项目，
+        你可以在https://github.com/RikkaApps/Shizuku找到源代码和更多详细信息。</string>
 </resources>

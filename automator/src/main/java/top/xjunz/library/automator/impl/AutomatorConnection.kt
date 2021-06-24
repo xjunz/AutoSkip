@@ -31,11 +31,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     }
 
     private val mHandlerThread = HandlerThread(HANDLER_THREAD_NAME)
-    private val handler by lazy {
-        Handler(mHandlerThread.looper)
-    }
     private lateinit var mUiAutomation: UiAutomation
-
     override fun connect() {
         Log.i(TAG, "v9")
         check(!mHandlerThread.isAlive) { "Already connected!" }
@@ -50,19 +46,16 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     private fun startMonitor() {
         mUiAutomation.serviceInfo = AccessibilityServiceInfo().apply {
             eventTypes = AccessibilityEvent.TYPE_WINDOWS_CHANGED or AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
-            flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS or AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
+            //flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS or AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
         }
         mUiAutomation.setOnAccessibilityEventListener { event ->
-            if (event == null) {
-                return@setOnAccessibilityEventListener
-            }
             if (event.packageName?.startsWith("com.android") == true) {
                 return@setOnAccessibilityEventListener
             }
             val windowInfo = mUiAutomation.rootInActiveWindow ?: return@setOnAccessibilityEventListener
             windowInfo.findAccessibilityNodeInfosByText("跳过")?.forEach { node ->
-                Log.i(TAG,"duration: ${System.currentTimeMillis() - lastHandleTimestamp}")
-                Log.i(TAG,"last: $lastHandledNodeInfo cur: $node, equal?: ${Objects.equals(lastHandledNodeInfo, node)}")
+                Log.i(TAG, "duration: ${System.currentTimeMillis() - lastHandleTimestamp}")
+                Log.i(TAG, "last: $lastHandledNodeInfo cur: $node, equal?: ${Objects.equals(lastHandledNodeInfo, node)}")
                 if (System.currentTimeMillis() - lastHandleTimestamp < 500 && Objects.equals(lastHandledNodeInfo, node)) {
                     return@forEach
                 }
@@ -104,7 +97,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
 
     override fun setOnAccessibilityEventListener(client: IOnAccessibilityEventListener?) = mUiAutomation.setOnAccessibilityEventListener { event -> client!!.onAccessibilityEvent(event) }
 
-    override fun sayHello() = "Hello from remote server! My uid is ${Process.myUid()}"
+    override fun sayHello() = "Hello from remote service! My uid is ${Process.myUid()}"
 
     override fun isConnnected() = mHandlerThread.isAlive
 

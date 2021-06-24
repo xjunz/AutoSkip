@@ -1,42 +1,262 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/root"
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_height="?actionBarSize"
+            android:background="?colorPrimary"
+            android:elevation="2dp">
+
+        </RelativeLayout>
 
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="bindAutomatorService"
-                android:text="Bind Service" />
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/root"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="showTestPage"
-                android:text="Test" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingHorizontal="8dp">
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="shutdownService"
-                android:text="Shutdown" />
 
-            <TextView
-                android:id="@+id/tv_output"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="16dp" />
-        </LinearLayout>
-    </FrameLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_option_frame"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_service_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="服务正在运行..."
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                        android:textColor="?android:textColorPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_service_status"
+                        android:layout_marginTop="8dp"
+                        android:text="已运行20:23:01"
+                        android:typeface="monospace" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:stateListAnimator="@null"
+                        android:text="停止"
+                        android:textColor="?colorOnSecondary"
+                        app:backgroundTint="?colorSecondary"
+                        app:cornerRadius="24dp" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_option_frame"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_activate_via_shizuku"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/activate_via_shizuku"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                        android:textColor="?android:textColorPrimary" />
+
+                    <TextView
+                        android:id="@+id/tv_intro_to_shizuku"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_activate_via_shizuku"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="8dp"
+                        android:letterSpacing=".05"
+                        android:lineSpacingExtra="1dp"
+                        android:text="@string/intro_to_shizuku"
+                        android:typeface="monospace" />
+
+                    <Space
+                        android:id="@+id/center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true" />
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_intro_to_shizuku"
+                        android:layout_marginTop="8dp">
+
+
+                        <com.google.android.material.button.MaterialButton
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_toEndOf="@id/center"
+                            android:layout_weight="0"
+                            android:enabled="false"
+                            android:stateListAnimator="@null"
+                            android:text="激活"
+                            app:cornerRadius="24dp"
+                            app:icon="@drawable/ic_baseline_play_arrow_24"
+                            app:iconGravity="textStart"
+                            app:strokeWidth="1dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:stateListAnimator="@null"
+                            android:text="安装Shizuku"
+                            app:cornerRadius="24dp"
+                            app:icon="@drawable/ic_baseline_download_24"
+                            app:iconGravity="textStart"
+                            app:strokeColor="?colorPrimary"
+                            app:strokeWidth="1dp" />
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_option_frame"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/iv_test"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/bg_circle"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_baseline_bug_report_24" />
+
+                    <TextView
+                        android:id="@+id/tv_test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/iv_test"
+                        android:text="可用性测试"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
+                    <TextView
+                        android:id="@+id/tv_caption_test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_test"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_toEndOf="@id/iv_test"
+                        android:text="测试服务是否激活并且能否正常使用" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_option_frame"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/iv_stats"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/bg_circle"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_baseline_history_24"
+                        app:tint="?colorOnPrimary" />
+
+                    <TextView
+                        android:id="@+id/tv_stats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/iv_stats"
+                        android:text="统计数据"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
+                    <TextView
+                        android:id="@+id/tv_caption_stats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_stats"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_toEndOf="@id/iv_stats"
+                        android:text="累计已跳过25次" />
+
+                    <ImageButton
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_baseline_chevron_right_24"
+                        android:tint="?colorOnPrimary" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_option_frame"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/iv_config"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/bg_circle"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_baseline_settings_24"
+                        app:tint="?colorOnPrimary" />
+
+                    <TextView
+                        android:id="@+id/tv_config"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/iv_config"
+                        android:text="设置"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
+                    <ImageButton
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_baseline_chevron_right_24"
+                        android:tint="?colorOnPrimary" />
+                </RelativeLayout>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.appcompat.widget.LinearLayoutCompat>
 </layout>
