@@ -2,6 +2,13 @@
     <string name="app_name">自动点击</string>
     <string name="skip_in_seconds">跳过 %s 秒</string>
     <string name="activate_via_shizuku">使用<b> Shizuku </b>激活</string>
-    <string name="intro_to_shizuku">本服务需要Shizuku的授权才能正常使用。Shizuku是一个开源项目，
-        你可以在https://github.com/RikkaApps/Shizuku找到源代码和更多详细信息。</string>
+    <string name="intro_to_shizuku">本服务需要Shizuku的授权才能正常使用。Shizuku是一个健壮且可信的开源项目，
+        你可以在<a href='https://github.com/RikkaApps/Shizuku'>这里</a>找到源代码和更多详细信息。</string>
+    <string name="more_to_say">本应用专注于帮助您跳过应用的启动广告/宣传页。\n\n
+        相比于其他同类产品，本应用有以下优点：\n
+        • 不需要您手动开启辅助功能\n
+        • 不需要在通知栏显示通知以保持后台运行\n
+        • 您完全不必刻意地“保活”此应用\n
+        • 省电且占用系统资源少\n\n除此之外，本应用是<a href='https://github.com/xjunz/Automator'>开源</a>应用，您不必担心此应用在后台“做坏事”。
+        (<b>注：辅助功能是非常强大且危险的，请谨慎授予其他应用此权限</b>)</string>
 </resources>

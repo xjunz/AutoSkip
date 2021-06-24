@@ -1,30 +1,28 @@
 package top.xjunz.automator
 
-import android.app.UiAutomation
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
-import android.os.SystemClock
 import android.util.Log
-import android.view.InputDevice
-import android.view.MotionEvent
+import android.util.TypedValue
 import android.view.View
-import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
-import androidx.annotation.RequiresApi
+import androidx.annotation.Dimension
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
+import com.google.android.material.shape.MaterialShapeDrawable
 import rikka.shizuku.Shizuku
 import top.xjunz.automator.databinding.ActivityMainBinding
-import top.xjunz.library.automator.Automator
-import top.xjunz.library.automator.AutomatorFactory
 import top.xjunz.library.automator.IAutomatorConnection
-import top.xjunz.library.automator.IOnAccessibilityEventListener
 import top.xjunz.library.automator.impl.AutomatorConnection
 import java.util.*
+
 
 /**
  * @author xjunz 2021/6/20 21:05
@@ -39,6 +37,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding.root.setOnApplyWindowInsetsListener { v, insets ->
+            binding.topBar.setPadding(0, insets.systemWindowInsetTop, 0, 0)
+            binding.scrollView.setPadding(0, binding.scrollView.paddingTop + insets.systemWindowInsetTop, 0, insets.systemWindowInsetBottom)
+            return@setOnApplyWindowInsetsListener insets
+        }
+        initViews()
         if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_DENIED) {
             Shizuku.addRequestPermissionResultListener { requestCode, grantResult ->
                 if (requestCode == SHIZUKU_PERMISSION_REQUEST_CODE && grantResult == PackageManager.PERMISSION_GRANTED) {
@@ -55,18 +59,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun initViews() {
+        val cornerSize = resources.getDimension(R.dimen.corner_item)
+        val back = MaterialShapeDrawable().apply {
+            setCornerSize(cornerSize)
+            strokeColor = getColorStateList(R.color.material_on_surface_stroke)
+            strokeWidth = 3f
+            setTint(Color.WHITE)
+        }
+        binding.topBar.background = back
+        binding.scrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            Log.i("XJUNZ", "sx: ${scrollX}, sy: ${scrollY}")
+            val f = 1 - 1.coerceAtMost(scrollY / 66)
+            back.apply {
+                setCornerSize(cornerSize * f)
+                elevation = f * 6f
+                strokeWidth = 3f * (1-f)
+            }
+        })
+    }
+
     private fun toast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
     private fun init() {
-        Shizuku.addBinderReceivedListenerSticky {
-            //binding.tvOutput.text = "Binder received!"
+        Shizuku.addBinderReceivedListenerSticky { //binding.tvOutput.text = "Binder received!"
         }
-        Shizuku.addBinderDeadListener {
-            //binding.tvOutput.text = "Binder dead!"
-        }
-        /*when (Shizuku.checkRemotePermission("android.permission.REAL_GET_TASKS")) {
+        Shizuku.addBinderDeadListener { //binding.tvOutput.text = "Binder dead!"
+        }/*when (Shizuku.checkRemotePermission("android.permission.REAL_GET_TASKS")) {
             PackageManager.PERMISSION_GRANTED -> {
                 val automator: Automator = AutomatorFactory.getAutomator(AutomatorFactory.Mode.SHIZUKU)
                 object : Thread() {
@@ -105,11 +126,9 @@ class MainActivity : AppCompatActivity() {
 
     private var automatorService: IAutomatorConnection? = null
     private val userServiceStandaloneProcessArgs by lazy {
-        Shizuku.UserServiceArgs(ComponentName(BuildConfig.APPLICATION_ID, AutomatorConnection::class.java.name))
-            .processNameSuffix("service").debuggable(BuildConfig.DEBUG).version(BuildConfig.VERSION_CODE)
+        Shizuku.UserServiceArgs(ComponentName(BuildConfig.APPLICATION_ID, AutomatorConnection::class.java.name)).processNameSuffix("service").debuggable(BuildConfig.DEBUG).version(BuildConfig.VERSION_CODE)
     }
-    private val userServiceConnection by lazy {
-        //UiAutomation
+    private val userServiceConnection by lazy { //UiAutomation
         object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
                 val res = StringBuilder()
@@ -121,8 +140,7 @@ class MainActivity : AppCompatActivity() {
                             res.append(sayHello())
                             if (!isConnnected) {
                                 connect()
-                            }
-                            /* setOnAccessibilityEventListener(object : IOnAccessibilityEventListener.Stub() {
+                            }/* setOnAccessibilityEventListener(object : IOnAccessibilityEventListener.Stub() {
                                  override fun onAccessibilityEvent(event: AccessibilityEvent?) {
                                      Log.i("XJUNZ", event!!.packageName.toString() + "/" + event.className)
                                      event.recycle()
@@ -135,22 +153,19 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     res.append("invalid binder for ").append(name).append(" received")
-                }
-               // binding.tvOutput.text = res.toString()
+                } // binding.tvOutput.text = res.toString()
             }
 
-            override fun onServiceDisconnected(name: ComponentName?) {
-               // binding.tvOutput.text = "${name?.flattenToString() ?: "Remote service"} died!"
+            override fun onServiceDisconnected(name: ComponentName?) { // binding.tvOutput.text = "${name?.flattenToString() ?: "Remote service"} died!"
             }
         }
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-      //  automatorService?.run {
-       //     disconnect()
-      //      shutdown()
-      //  }
+        super.onDestroy() //  automatorService?.run {
+        //     disconnect()
+        //      shutdown()
+        //  }
         Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, false)
     }
 
@@ -169,8 +184,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun showTestPage(view: View) {
-        supportFragmentManager.beginTransaction().add(R.id.root, TestFragment())
-            .addToBackStack("test").commit()
+        supportFragmentManager.beginTransaction().add(R.id.scroll_view, TestFragment()).addToBackStack("test").commit()
     }
 
     fun shutdownService(view: View) {

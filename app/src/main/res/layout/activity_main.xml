@@ -2,24 +2,35 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <RelativeLayout
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:background="?colorPrimary"
-            android:elevation="2dp">
+            android:layout_height="wrap_content"
+            android:alpha="0.8"
+            android:layout_marginHorizontal="8dp"
+            android:background="?android:colorBackground"
+            android:elevation="0dp">
 
+            <TextView
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="?actionBarSize"
+                android:layout_marginStart="16dp"
+                android:text="@string/app_name"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
         </RelativeLayout>
 
 
         <androidx.core.widget.NestedScrollView
-            android:id="@+id/root"
+            android:id="@+id/scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingTop="?actionBarSize">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -31,7 +42,6 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
                     android:background="@drawable/bg_option_frame"
                     android:orientation="vertical"
                     android:padding="16dp">
@@ -49,7 +59,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_service_status"
                         android:layout_marginTop="8dp"
-                        android:text="已运行20:23:01"
+                        android:text="已运行 20:23:01"
                         android:typeface="monospace" />
 
                     <com.google.android.material.button.MaterialButton
@@ -60,7 +70,10 @@
                         android:text="停止"
                         android:textColor="?colorOnSecondary"
                         app:backgroundTint="?colorSecondary"
-                        app:cornerRadius="24dp" />
+                        app:cornerRadius="24dp"
+                        app:icon="@drawable/ic_baseline_stop_24"
+                        app:iconTint="?colorOnSecondary"
+                        app:rippleColor="?colorSecondaryVariant" />
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -112,7 +125,7 @@
                             android:layout_weight="0"
                             android:enabled="false"
                             android:stateListAnimator="@null"
-                            android:text="激活"
+                            android:text="激活  "
                             app:cornerRadius="24dp"
                             app:icon="@drawable/ic_baseline_play_arrow_24"
                             app:iconGravity="textStart"
@@ -145,12 +158,13 @@
 
                     <ImageView
                         android:id="@+id/iv_test"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:layout_centerVertical="true"
                         android:background="@drawable/bg_circle"
                         android:scaleType="centerInside"
-                        android:src="@drawable/ic_baseline_bug_report_24" />
+                        android:src="@drawable/ic_baseline_bug_report_24"
+                        app:tint="?colorPrimaryVariant" />
 
                     <TextView
                         android:id="@+id/tv_test"
@@ -183,13 +197,13 @@
 
                     <ImageView
                         android:id="@+id/iv_stats"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:layout_centerVertical="true"
                         android:background="@drawable/bg_circle"
                         android:scaleType="centerInside"
                         android:src="@drawable/ic_baseline_history_24"
-                        app:tint="?colorOnPrimary" />
+                        app:tint="?colorPrimaryVariant" />
 
                     <TextView
                         android:id="@+id/tv_stats"
@@ -211,13 +225,12 @@
                         android:text="累计已跳过25次" />
 
                     <ImageButton
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:background="?selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_baseline_chevron_right_24"
-                        android:tint="?colorOnPrimary" />
+                        android:src="@drawable/ic_baseline_chevron_right_24" />
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -229,13 +242,13 @@
 
                     <ImageView
                         android:id="@+id/iv_config"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:layout_centerVertical="true"
                         android:background="@drawable/bg_circle"
                         android:scaleType="centerInside"
                         android:src="@drawable/ic_baseline_settings_24"
-                        app:tint="?colorOnPrimary" />
+                        app:tint="?colorPrimaryVariant" />
 
                     <TextView
                         android:id="@+id/tv_config"
@@ -248,15 +261,60 @@
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
                     <ImageButton
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:background="?selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_baseline_chevron_right_24"
-                        android:tint="?colorOnPrimary" />
+                        android:src="@drawable/ic_baseline_chevron_right_24" />
                 </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_option_frame"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/iv_more"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignTop="@id/tv_more"
+                        android:layout_marginTop="4dp"
+                        android:background="@drawable/bg_circle"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_baseline_more_horiz_24"
+                        app:tint="?colorPrimaryVariant" />
+
+                    <TextView
+                        android:id="@+id/tv_more"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/iv_more"
+                        android:text="更多"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
+                    <TextView
+                        android:id="@+id/tv_more_caption"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_more"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_toEndOf="@id/iv_more"
+                        android:text="@string/more_to_say" />
+                </RelativeLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingVertical="8dp"
+                    android:text="By xjunz 2021"
+                    android:typeface="monospace" />
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
-    </androidx.appcompat.widget.LinearLayoutCompat>
+    </FrameLayout>
 </layout>
