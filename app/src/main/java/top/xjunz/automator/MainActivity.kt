@@ -1,19 +1,20 @@
 package top.xjunz.automator
 
+import android.animation.ValueAnimator
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
-import android.graphics.Color
+import android.graphics.drawable.InsetDrawable
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
-import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.annotation.Dimension
+import androidx.annotation.FloatRange
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.OneShotPreDrawListener
 import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.shape.MaterialShapeDrawable
@@ -37,11 +38,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        binding.root.setOnApplyWindowInsetsListener { v, insets ->
-            binding.topBar.setPadding(0, insets.systemWindowInsetTop, 0, 0)
-            binding.scrollView.setPadding(0, binding.scrollView.paddingTop + insets.systemWindowInsetTop, 0, insets.systemWindowInsetBottom)
-            return@setOnApplyWindowInsetsListener insets
-        }
+
         initViews()
         if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_DENIED) {
             Shizuku.addRequestPermissionResultListener { requestCode, grantResult ->
@@ -61,21 +58,58 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViews() {
         val cornerSize = resources.getDimension(R.dimen.corner_item)
-        val back = MaterialShapeDrawable().apply {
+        val margin = Utils.dp2px(8)
+        val z = Utils.dp2px(3)
+        val mtrl = MaterialShapeDrawable().apply {
             setCornerSize(cornerSize)
             strokeColor = getColorStateList(R.color.material_on_surface_stroke)
-            strokeWidth = 3f
-            setTint(Color.WHITE)
+            strokeWidth = Utils.dp2px(1)
+            fillColor = Utils.getAttributeColorStateList(this@MainActivity, android.R.attr.colorBackground)
+            requiresCompatShadow()
+            setShadowColor(0xA0A0A0)
+            shadowCompatibilityMode = MaterialShapeDrawable.SHADOW_COMPAT_MODE_ALWAYS
         }
-        binding.topBar.background = back
-        binding.scrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
-            Log.i("XJUNZ", "sx: ${scrollX}, sy: ${scrollY}")
-            val f = 1 - 1.coerceAtMost(scrollY / 66)
-            back.apply {
-                setCornerSize(cornerSize * f)
-                elevation = f * 6f
-                strokeWidth = 3f * (1-f)
+        val back = InsetDrawable(mtrl, 0, 0, 0, z.toInt())
+        binding.topBar.apply {
+            background = back
+            bringToFront()
+            setOnApplyWindowInsetsListener { _, insets ->
+                OneShotPreDrawListener.add(this) {
+                    binding.scrollView.setPadding(0, height, 0, insets.systemWindowInsetBottom)
+                }
+                setPadding(0, insets.systemWindowInsetTop, 0, z.toInt())
+                return@setOnApplyWindowInsetsListener insets
             }
+        }
+        var lastScrollY = 0
+        binding.scrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            var range: IntRange? = null
+            if (lastScrollY < margin && scrollY >= margin) {
+                range = 0..1
+            } else if (lastScrollY > margin && scrollX <= margin) {
+                range = IntRange(1, 0)
+            }
+            if (range == null) {
+                return@OnScrollChangeListener
+            }
+            ValueAnimator.ofFloat(range.first.toFloat(), range.last.toFloat()).apply {
+                addUpdateListener {
+                    val f = it.animatedFraction
+                    mtrl.apply {
+                        setCornerSize(cornerSize * (1 - f))
+                        strokeWidth = 3f * (1 - f)
+                        elevation = 9 * f
+                    }
+                    binding.topBar.apply {
+                        layoutParams = (layoutParams as ViewGroup.MarginLayoutParams).apply {
+                            marginStart = ((1 - f) * margin).toInt()
+                            marginEnd = ((1 - f) * margin).toInt()
+                        }
+                    }
+                }
+            }.start()
+
+            lastScrollY = scrollY
         })
     }
 
@@ -193,4 +227,6 @@ class MainActivity : AppCompatActivity() {
             shutdown()
         }
     }
+
+    fun showMenu(view: View) {}
 }

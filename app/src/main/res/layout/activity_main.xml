@@ -10,18 +10,30 @@
             android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:alpha="0.8"
             android:layout_marginHorizontal="8dp"
-            android:background="?android:colorBackground"
-            android:elevation="0dp">
+            android:alpha=".78"
+            android:clipToPadding="false">
 
             <TextView
-                android:gravity="center"
+                android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="?actionBarSize"
                 android:layout_marginStart="16dp"
+                android:alpha=".8"
+                android:gravity="center"
                 android:text="@string/app_name"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/tv_title"
+                android:layout_alignBottom="@id/tv_title"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="16dp"
+                android:background="?selectableItemBackgroundBorderless"
+                android:onClick="showMenu"
+                android:src="@drawable/ic_baseline_more_vert_24" />
         </RelativeLayout>
 
 
@@ -29,6 +41,7 @@
             android:id="@+id/scroll_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
             android:clipToPadding="false"
             android:paddingTop="?actionBarSize">
 
@@ -306,14 +319,6 @@
                         android:layout_toEndOf="@id/iv_more"
                         android:text="@string/more_to_say" />
                 </RelativeLayout>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:paddingVertical="8dp"
-                    android:text="By xjunz 2021"
-                    android:typeface="monospace" />
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
     </FrameLayout>
