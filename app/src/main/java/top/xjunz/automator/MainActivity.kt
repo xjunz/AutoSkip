@@ -1,23 +1,17 @@
 package top.xjunz.automator
 
-import android.animation.ValueAnimator
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.graphics.drawable.InsetDrawable
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
-import androidx.annotation.FloatRange
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.OneShotPreDrawListener
-import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
-import com.google.android.material.shape.MaterialShapeDrawable
+import androidx.lifecycle.ViewModelProvider
 import rikka.shizuku.Shizuku
 import top.xjunz.automator.databinding.ActivityMainBinding
 import top.xjunz.library.automator.IAutomatorConnection
@@ -30,6 +24,9 @@ import java.util.*
  */
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private val viewModel by lazy {
+        ViewModelProvider(this, ViewModelProvider.NewInstanceFactory()).get(AutomatorViewModel::class.java)
+    }
 
     companion object {
         const val SHIZUKU_PERMISSION_REQUEST_CODE = 13
@@ -37,8 +34,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-
+        binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main).apply {
+            lifecycleOwner = this@MainActivity
+            vm = viewModel
+        }
         initViews()
         if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_DENIED) {
             Shizuku.addRequestPermissionResultListener { requestCode, grantResult ->
@@ -57,60 +56,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        val cornerSize = resources.getDimension(R.dimen.corner_item)
-        val margin = Utils.dp2px(8)
-        val z = Utils.dp2px(3)
-        val mtrl = MaterialShapeDrawable().apply {
-            setCornerSize(cornerSize)
-            strokeColor = getColorStateList(R.color.material_on_surface_stroke)
-            strokeWidth = Utils.dp2px(1)
-            fillColor = Utils.getAttributeColorStateList(this@MainActivity, android.R.attr.colorBackground)
-            requiresCompatShadow()
-            setShadowColor(0xA0A0A0)
-            shadowCompatibilityMode = MaterialShapeDrawable.SHADOW_COMPAT_MODE_ALWAYS
+        TopBarController(binding.topBar, binding.scrollView).init()
+        viewModel.apply {
+            isEnabled.value = false
+            isRunning.value = false
         }
-        val back = InsetDrawable(mtrl, 0, 0, 0, z.toInt())
-        binding.topBar.apply {
-            background = back
-            bringToFront()
-            setOnApplyWindowInsetsListener { _, insets ->
-                OneShotPreDrawListener.add(this) {
-                    binding.scrollView.setPadding(0, height, 0, insets.systemWindowInsetBottom)
-                }
-                setPadding(0, insets.systemWindowInsetTop, 0, z.toInt())
-                return@setOnApplyWindowInsetsListener insets
-            }
-        }
-        var lastScrollY = 0
-        binding.scrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
-            var range: IntRange? = null
-            if (lastScrollY < margin && scrollY >= margin) {
-                range = 0..1
-            } else if (lastScrollY > margin && scrollX <= margin) {
-                range = IntRange(1, 0)
-            }
-            if (range == null) {
-                return@OnScrollChangeListener
-            }
-            ValueAnimator.ofFloat(range.first.toFloat(), range.last.toFloat()).apply {
-                addUpdateListener {
-                    val f = it.animatedFraction
-                    mtrl.apply {
-                        setCornerSize(cornerSize * (1 - f))
-                        strokeWidth = 3f * (1 - f)
-                        elevation = 9 * f
-                    }
-                    binding.topBar.apply {
-                        layoutParams = (layoutParams as ViewGroup.MarginLayoutParams).apply {
-                            marginStart = ((1 - f) * margin).toInt()
-                            marginEnd = ((1 - f) * margin).toInt()
-                        }
-                    }
-                }
-            }.start()
-
-            lastScrollY = scrollY
-        })
     }
 
     private fun toast(msg: String) {
@@ -118,9 +68,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        Shizuku.addBinderReceivedListenerSticky { //binding.tvOutput.text = "Binder received!"
+        //sticky: 注册的时候如果已经收到binder，直接调用，不用等到下一次收到binder才调用
+        Shizuku.addBinderReceivedListenerSticky {
+            viewModel.isEnabled.postValue(true)
         }
-        Shizuku.addBinderDeadListener { //binding.tvOutput.text = "Binder dead!"
+        Shizuku.addBinderDeadListener {
+            viewModel.isRunning.postValue(false)
         }/*when (Shizuku.checkRemotePermission("android.permission.REAL_GET_TASKS")) {
             PackageManager.PERMISSION_GRANTED -> {
                 val automator: Automator = AutomatorFactory.getAutomator(AutomatorFactory.Mode.SHIZUKU)
@@ -174,12 +127,8 @@ class MainActivity : AppCompatActivity() {
                             res.append(sayHello())
                             if (!isConnnected) {
                                 connect()
-                            }/* setOnAccessibilityEventListener(object : IOnAccessibilityEventListener.Stub() {
-                                 override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-                                     Log.i("XJUNZ", event!!.packageName.toString() + "/" + event.className)
-                                     event.recycle()
-                                 }
-                             })*/
+                                viewModel.isEnabled.value = true
+                            }
                         }
                     } catch (e: RemoteException) {
                         e.printStackTrace()
@@ -187,10 +136,11 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     res.append("invalid binder for ").append(name).append(" received")
-                } // binding.tvOutput.text = res.toString()
+                }
             }
 
-            override fun onServiceDisconnected(name: ComponentName?) { // binding.tvOutput.text = "${name?.flattenToString() ?: "Remote service"} died!"
+            override fun onServiceDisconnected(name: ComponentName?) {
+                viewModel.isRunning.value = false
             }
         }
     }
@@ -229,4 +179,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun showMenu(view: View) {}
+
+    private fun bindAutomatorService() {
+        try {
+            if (Shizuku.getVersion() < 10) {
+                toast("requires Shizuku API 10")
+            } else {
+                Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
+            }
+        } catch (tr: Throwable) {
+            tr.printStackTrace()
+        }
+    }
+
+    fun toggleService(view: View) {
+        automatorService?.run {
+            if (isConnnected) {
+                disconnect()
+                shutdown()
+            } else {
+                bindAutomatorService()
+            }
+        } ?: try {
+            if (Shizuku.getVersion() < 10) {
+                toast("requires Shizuku API 10")
+            } else {
+                bindAutomatorService()
+            }
+        } catch (tr: Throwable) {
+            tr.printStackTrace()
+        }
+    }
 }

@@ -11,4 +11,21 @@
         • 您完全不必刻意地“保活”此应用\n
         • 省电且占用系统资源少\n\n除此之外，本应用是<a href='https://github.com/xjunz/Automator'>开源</a>应用，您不必担心此应用在后台“做坏事”。
     </string>
+    <string name="more">更多</string>
+    <string name="service_is_running">服务正在运行…</string>
+    <string name="format_running_duration">已运行 %s</string>
+    <string name="stop_spaced">停止&#160;&#160;</string>
+    <string name="about">关于</string>
+    <string name="settings">设置</string>
+    <string name="statistics">统计数据</string>
+    <string name="format_total_count">累计已跳过 %s 次</string>
+    <string name="caption_test">测试服务是否激活并且能否正常使用</string>
+    <string name="usability_test">可用性测试</string>
+    <string name="install_shizuku">安装Shizuku</string>
+    <string name="activate_spaced">激活&#160;&#160;</string>
+    <string name="enter">进入</string>
+    <string name="run_spaced">运行&#160;&#160;</string>
+    <string name="service_not_started">服务未启动</string>
+    <string name="pls_start_service">点击右侧按钮启动服务</string>
+    <string name="pls_activate_service">请先在下方激活服务</string>
 </resources>

@@ -1,18 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<?xml version="1.0" encoding="utf-8"?><!--suppress AndroidUnknownAttribute -->
+<layout xmlns:tools="http://schemas.android.com/tools">
 
-    <FrameLayout
+    <data>
+
+        <import type="android.text.method.LinkMovementMethod" />
+
+        <variable
+            name="vm"
+            type="top.xjunz.automator.AutomatorViewModel" />
+    </data>
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:ignore="ContentDescription">
 
-        <RelativeLayout
+        <FrameLayout
             android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
-            android:alpha=".78"
-            android:clipToPadding="false">
+            android:alpha=".9"
+            android:clickable="true"
+            tools:ignore="KeyboardInaccessibleWidget">
 
             <TextView
                 android:id="@+id/tv_title"
@@ -25,16 +36,15 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
             <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@id/tv_title"
-                android:layout_alignBottom="@id/tv_title"
-                android:layout_alignParentEnd="true"
+                tooltip="@{@string/more}"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center_vertical|end"
                 android:layout_marginEnd="16dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:onClick="showMenu"
                 android:src="@drawable/ic_baseline_more_vert_24" />
-        </RelativeLayout>
+        </FrameLayout>
 
 
         <androidx.core.widget.NestedScrollView
@@ -63,30 +73,37 @@
                         android:id="@+id/tv_service_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="服务正在运行..."
+                        android:text="@{vm.isRunning()?@string/service_is_running:@string/service_not_started}"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                        android:textColor="?android:textColorPrimary" />
+                        android:textColor="?android:textColorPrimary"
+                        tools:text="@string/service_not_started" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_service_status"
                         android:layout_marginTop="8dp"
-                        android:text="已运行 20:23:01"
+                        tools:text="@string/pls_activate_service"
                         android:typeface="monospace" />
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_run"
+                        android:onClick="toggleService"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
+                        android:activated="@{vm.isRunning()}"
                         android:stateListAnimator="@null"
-                        android:text="停止"
-                        android:textColor="?colorOnSecondary"
-                        app:backgroundTint="?colorSecondary"
+                        android:text="@{vm.isRunning()?@string/stop_spaced:@string/run_spaced}"
+                        android:textColor="@color/color_status_control"
                         app:cornerRadius="24dp"
-                        app:icon="@drawable/ic_baseline_stop_24"
-                        app:iconTint="?colorOnSecondary"
-                        app:rippleColor="?colorSecondaryVariant" />
+                        app:icon="@drawable/ic_status_control"
+                        app:backgroundTint="@color/color_status_tint"
+                        app:rippleColor="@color/color_status_ripple"
+                        app:strokeColor="@color/color_icon_tint"
+                        tools:ignore="RelativeOverlap"
+                        tools:text="@string/run_spaced"/>
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -113,6 +130,7 @@
                         android:layout_marginTop="8dp"
                         android:letterSpacing=".05"
                         android:lineSpacingExtra="1dp"
+                        android:movementMethod="@{LinkMovementMethod.getInstance()}"
                         android:text="@string/intro_to_shizuku"
                         android:typeface="monospace" />
 
@@ -138,9 +156,9 @@
                             android:layout_weight="0"
                             android:enabled="false"
                             android:stateListAnimator="@null"
-                            android:text="激活  "
+                            android:text="@string/activate_spaced"
                             app:cornerRadius="24dp"
-                            app:icon="@drawable/ic_baseline_play_arrow_24"
+                            app:icon="@drawable/ic_baseline_bolt_24"
                             app:iconGravity="textStart"
                             app:strokeWidth="1dp" />
 
@@ -151,7 +169,7 @@
                             android:layout_marginStart="8dp"
                             android:layout_weight="1"
                             android:stateListAnimator="@null"
-                            android:text="安装Shizuku"
+                            android:text="@string/install_shizuku"
                             app:cornerRadius="24dp"
                             app:icon="@drawable/ic_baseline_download_24"
                             app:iconGravity="textStart"
@@ -185,7 +203,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_toEndOf="@id/iv_test"
-                        android:text="可用性测试"
+                        android:text="@string/usability_test"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
                     <TextView
@@ -196,7 +214,7 @@
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
                         android:layout_toEndOf="@id/iv_test"
-                        android:text="测试服务是否激活并且能否正常使用" />
+                        android:text="@string/caption_test" />
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -224,8 +242,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_toEndOf="@id/iv_stats"
-                        android:text="统计数据"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+                        android:text="@string/statistics"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                        tools:ignore="RelativeOverlap" />
 
                     <TextView
                         android:id="@+id/tv_caption_stats"
@@ -235,14 +254,15 @@
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
                         android:layout_toEndOf="@id/iv_stats"
-                        android:text="累计已跳过25次" />
+                        android:text="@string/format_total_count" />
 
-                    <ImageButton
+                    <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/enter"
                         android:src="@drawable/ic_baseline_chevron_right_24" />
                 </RelativeLayout>
 
@@ -251,6 +271,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:background="@drawable/bg_option_frame"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:padding="16dp">
 
                     <ImageView
@@ -270,15 +292,17 @@
                         android:layout_centerVertical="true"
                         android:layout_marginStart="16dp"
                         android:layout_toEndOf="@id/iv_config"
-                        android:text="设置"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+                        android:text="@string/settings"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                        tools:ignore="RelativeOverlap" />
 
-                    <ImageButton
+                    <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/enter"
                         android:src="@drawable/ic_baseline_chevron_right_24" />
                 </RelativeLayout>
 
@@ -306,7 +330,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_toEndOf="@id/iv_more"
-                        android:text="更多"
+                        android:text="@string/about"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
                     <TextView
@@ -317,6 +341,7 @@
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
                         android:layout_toEndOf="@id/iv_more"
+                        android:movementMethod="@{LinkMovementMethod.getInstance()}"
                         android:text="@string/more_to_say" />
                 </RelativeLayout>
             </LinearLayout>

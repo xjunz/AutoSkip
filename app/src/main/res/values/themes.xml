@@ -11,5 +11,7 @@
         <item name="colorOnSecondary">@color/secondaryTextColor</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:lineSpacingExtra">1dp</item>
     </style>
 </resources>
