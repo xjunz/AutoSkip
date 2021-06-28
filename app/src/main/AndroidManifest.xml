@@ -4,7 +4,9 @@
     package="top.xjunz.automator"
     tools:ignore="ProtectedPermissions">
 
-    <uses-permission android:name="android.permission.INJECT_EVENTS" />
+    <queries>
+        <package android:name="moe.shizuku.privileged.api" />
+    </queries>
     <application
         android:name=".AutomatorApp"
         android:allowBackup="true"

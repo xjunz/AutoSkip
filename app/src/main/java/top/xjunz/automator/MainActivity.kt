@@ -1,9 +1,14 @@
 package top.xjunz.automator
 
+import android.annotation.SuppressLint
+import android.app.UiAutomation
 import android.content.ComponentName
+import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
@@ -11,6 +16,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import rikka.shizuku.Shizuku
 import top.xjunz.automator.databinding.ActivityMainBinding
@@ -39,27 +45,34 @@ class MainActivity : AppCompatActivity() {
             vm = viewModel
         }
         initViews()
-        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_DENIED) {
-            Shizuku.addRequestPermissionResultListener { requestCode, grantResult ->
-                if (requestCode == SHIZUKU_PERMISSION_REQUEST_CODE && grantResult == PackageManager.PERMISSION_GRANTED) {
-                    toast("Shizuku permission granted!")
-                    init()
+        initShizuku()
+    }
+
+    private val statusObserver by lazy {
+        Observer<Boolean> {
+            mainHandler.removeCallbacks(updateDurationTask)
+            if (viewModel.isEnabled.value == true) {
+                if (viewModel.isRunning.value == true) {
+                    mainHandler.post(updateDurationTask)
                 } else {
-                    toast("Please grant the shizuku permission!")
-                    finish()
+                    binding.tvCaptionStatus.setText(R.string.pls_start_service)
                 }
+            } else {
+                binding.tvCaptionStatus.setText(R.string.pls_activate_service)
             }
-            Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
-        } else {
-            init()
         }
     }
 
+    @SuppressLint("QueryPermissionsNeeded")
     private fun initViews() {
         TopBarController(binding.topBar, binding.scrollView).init()
         viewModel.apply {
+            isEnabled.observe(this@MainActivity, statusObserver)
+            isRunning.observe(this@MainActivity, statusObserver)
             isEnabled.value = false
             isRunning.value = false
+            isAvailable.value = false
+            updateShizukuInstallationState()
         }
     }
 
@@ -67,48 +80,39 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
-    private fun init() {
+    private val mainHandler by lazy {
+        Handler(mainLooper)
+    }
+
+    private var serviceStartTimestamp = -1L
+
+    private val updateDurationTask = object : Runnable {
+        override fun run() {
+            if (serviceStartTimestamp > 0) {
+                (System.currentTimeMillis() - serviceStartTimestamp).let {
+                    binding.tvCaptionStatus.text = String.format(
+                        getString(R.string.format_running_duration),
+                        it / 3_600_000, it / 60_000 % 60, it / 1000 % 60)
+                }
+            }
+            mainHandler.postDelayed(this, 1000)
+        }
+    }
+
+    private fun initShizuku() {
         //sticky: 注册的时候如果已经收到binder，直接调用，不用等到下一次收到binder才调用
         Shizuku.addBinderReceivedListenerSticky {
-            viewModel.isEnabled.postValue(true)
+            viewModel.apply {
+                isAvailable.value = true
+                isEnabled.value = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+            }
         }
         Shizuku.addBinderDeadListener {
-            viewModel.isRunning.postValue(false)
-        }/*when (Shizuku.checkRemotePermission("android.permission.REAL_GET_TASKS")) {
-            PackageManager.PERMISSION_GRANTED -> {
-                val automator: Automator = AutomatorFactory.getAutomator(AutomatorFactory.Mode.SHIZUKU)
-                object : Thread() {
-                    var lastComponentName: ComponentName? = null
-                    override fun run() {
-                        super.run()
-                        while (true) {
-                            automator.getForegroundComponentName()?.run {
-                                if (!Objects.equals(this, lastComponentName)) {
-                                    Log.i("XJUNZ", flattenToString())
-                                    lastComponentName = this
-                                }
-                                //AccessibilityNodeInfo().findAccessibilityNodeInfosByText()
-                                if (className.contains("Splash")) {
-                                    Log.i("XJUNZ", flattenToString())
-                                    automator.run {
-                                        val downTime = SystemClock.uptimeMillis()
-                                        injectInputEvent(MotionEvent.obtain(downTime, downTime,
-                                            MotionEvent.ACTION_DOWN, 930f, 1900f, 0).apply {
-                                            source = InputDevice.SOURCE_TOUCHSCREEN
-                                        }, Automator.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH)
-                                        injectInputEvent(MotionEvent.obtain(downTime, downTime + 50,
-                                            MotionEvent.ACTION_UP, 930f, 1900f, 0).apply {
-                                            source = InputDevice.SOURCE_TOUCHSCREEN
-                                        }, Automator.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH)
-                                        Log.i("XJUNZ", "Click event injected!")
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }.start()
+            viewModel.apply {
+                isAvailable.value = false
+                updateShizukuInstallationState()
             }
-            PackageManager.PERMISSION_DENIED -> toast("Shizuku has no permission of INJECT_EVENTS.")*/
+        }
     }
 
     private var automatorService: IAutomatorConnection? = null
@@ -124,11 +128,14 @@ class MainActivity : AppCompatActivity() {
                     automatorService = IAutomatorConnection.Stub.asInterface(binder)
                     try {
                         automatorService?.run {
-                            res.append(sayHello())
+                            Log.i("automator", sayHello())
                             if (!isConnnected) {
                                 connect()
-                                viewModel.isEnabled.value = true
                             }
+                            serviceStartTimestamp = startTimestamp
+                            mainHandler.post(updateDurationTask)
+                            viewModel.isRunning.value = true
+                            viewModel.isEnabled.value = true
                         }
                     } catch (e: RemoteException) {
                         e.printStackTrace()
@@ -141,16 +148,9 @@ class MainActivity : AppCompatActivity() {
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 viewModel.isRunning.value = false
+                viewModel.updateShizukuInstallationState()
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy() //  automatorService?.run {
-        //     disconnect()
-        //      shutdown()
-        //  }
-        Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, false)
     }
 
     fun bindAutomatorService(view: View) {
@@ -171,43 +171,51 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction().add(R.id.scroll_view, TestFragment()).addToBackStack("test").commit()
     }
 
-    fun shutdownService(view: View) {
-        automatorService?.run {
-            disconnect()
-            shutdown()
-        }
-    }
-
     fun showMenu(view: View) {}
 
-    private fun bindAutomatorService() {
-        try {
-            if (Shizuku.getVersion() < 10) {
-                toast("requires Shizuku API 10")
-            } else {
-                Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-            }
-        } catch (tr: Throwable) {
-            tr.printStackTrace()
+    fun toggleService(view: View) {
+        if (viewModel.isRunning.value == true) {
+            Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, true)
+            viewModel.isRunning.value = false
+        } else {
+            Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
         }
     }
 
-    fun toggleService(view: View) {
-        automatorService?.run {
-            if (isConnnected) {
-                disconnect()
-                shutdown()
-            } else {
-                bindAutomatorService()
+    private val downloadUrl by lazy {
+        when (resources.configuration.locale.script) {
+            "Hans" -> "https://shizuku.rikka.app/zh-hans/download/"
+            "Hant" -> "https://shizuku.rikka.app/zh-hant/download/"
+            else -> "https://shizuku.rikka.app/download/"
+        }
+    }
+
+    fun performShizukuAction(view: View) {
+        if (viewModel.isInstalled.value == true) {
+            packageManager.getLaunchIntentForPackage(AutomatorApp.SHIZUKU_PACKAGE_NAME)?.let {
+                startActivity(it)
             }
-        } ?: try {
-            if (Shizuku.getVersion() < 10) {
-                toast("requires Shizuku API 10")
-            } else {
-                bindAutomatorService()
+        } else {
+            startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl)), null))
+        }
+    }
+
+    fun requestPermission(view: View) {
+        if (Shizuku.shouldShowRequestPermissionRationale()) {
+            packageManager.getLaunchIntentForPackage(AutomatorApp.SHIZUKU_PACKAGE_NAME)?.let {
+                startActivity(it)
             }
-        } catch (tr: Throwable) {
-            tr.printStackTrace()
+            toast(getString(R.string.pls_grant_manually))
+        } else {
+            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_DENIED) {
+                Shizuku.addRequestPermissionResultListener { requestCode, grantResult ->
+                    viewModel.isEnabled.value = requestCode == SHIZUKU_PERMISSION_REQUEST_CODE &&
+                            grantResult == PackageManager.PERMISSION_GRANTED
+                }
+                Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
+            } else {
+                viewModel.isEnabled.value = true
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ import android.content.Context
 class AutomatorApp : Application() {
     companion object {
         lateinit var appContext: Context
+        const val SHIZUKU_PACKAGE_NAME = "moe.shizuku.privileged.api"
     }
 
     override fun onCreate() {
