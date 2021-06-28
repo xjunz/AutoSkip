@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">自动点击</string>
+    <string name="app_name">自动跳过</string>
     <string name="skip_in_seconds">跳过 %s 秒</string>
     <string name="activate_via_shizuku">使用<b> Shizuku </b>激活</string>
     <string name="intro_to_shizuku">本服务需要Shizuku的授权才能正常使用。Shizuku是一个健壮且可信的开源项目，
@@ -13,7 +13,7 @@
     </string>
     <string name="more">更多</string>
     <string name="service_is_running">服务正在运行…</string>
-    <string name="format_running_duration">已运行 %s</string>
+    <string name="format_running_duration">已运行 %02d:%02d:%02d</string>
     <string name="stop_spaced">停止&#160;&#160;</string>
     <string name="about">关于</string>
     <string name="settings">设置</string>
@@ -23,9 +23,13 @@
     <string name="usability_test">可用性测试</string>
     <string name="install_shizuku">安装Shizuku</string>
     <string name="activate_spaced">激活&#160;&#160;</string>
+    <string name="activated_spaced">已激活&#160;&#160;</string>
     <string name="enter">进入</string>
     <string name="run_spaced">运行&#160;&#160;</string>
     <string name="service_not_started">服务未启动</string>
     <string name="pls_start_service">点击右侧按钮启动服务</string>
     <string name="pls_activate_service">请先在下方激活服务</string>
+    <string name="service_connecting">正在启动服务…</string>
+    <string name="launch_shizuku_client">打开Shizuku</string>
+    <string name="pls_grant_manually">请手动为此应用授权</string>
 </resources>

@@ -18,13 +18,3 @@ fun View.setTooltip(text: CharSequence) {
     TooltipCompat.setTooltipText(this, text)
     contentDescription = text
 }
-
-@BindingAdapter("running")
-fun MaterialButton.setIsRunning(running: Boolean) {
-    if (running) {
-        drawableState.plus(R.attr.state_running)
-    } else {
-
-    }
-    refreshDrawableState()
-}

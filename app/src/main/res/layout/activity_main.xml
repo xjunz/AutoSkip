@@ -73,37 +73,40 @@
                         android:id="@+id/tv_service_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{vm.isRunning()?@string/service_is_running:@string/service_not_started}"
+                        android:text="@{vm.isRunning()?@string/service_is_running:vm.isBinding()?@string/service_connecting:@string/service_not_started}"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
                         android:textColor="?android:textColorPrimary"
                         tools:text="@string/service_not_started" />
 
                     <TextView
+                        android:id="@+id/tv_caption_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_service_status"
                         android:layout_marginTop="8dp"
-                        tools:text="@string/pls_activate_service"
-                        android:typeface="monospace" />
+                        android:typeface="monospace"
+                        tools:text="@string/pls_activate_service" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_run"
-                        android:onClick="toggleService"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:activated="@{vm.isRunning()}"
+                        android:enabled="@{vm.isEnabled()&amp;&amp;!vm.isBinding()}"
+                        android:onClick="toggleService"
                         android:stateListAnimator="@null"
                         android:text="@{vm.isRunning()?@string/stop_spaced:@string/run_spaced}"
-                        android:textColor="@color/color_status_control"
-                        app:cornerRadius="24dp"
-                        app:icon="@drawable/ic_status_control"
+                        android:textColor="@color/color_status_text"
                         app:backgroundTint="@color/color_status_tint"
+                        app:cornerRadius="@dimen/corner_btn"
+                        app:icon="@drawable/ic_status_control"
+                        app:iconTint="@color/color_status_icon"
                         app:rippleColor="@color/color_status_ripple"
-                        app:strokeColor="@color/color_icon_tint"
+                        app:strokeColor="@color/color_status_stroke"
                         tools:ignore="RelativeOverlap"
-                        tools:text="@string/run_spaced"/>
+                        tools:text="@string/run_spaced" />
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -144,7 +147,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_intro_to_shizuku"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="8dp"
+                        android:gravity="center_vertical">
 
 
                         <com.google.android.material.button.MaterialButton
@@ -154,12 +158,16 @@
                             android:layout_marginEnd="8dp"
                             android:layout_toEndOf="@id/center"
                             android:layout_weight="0"
-                            android:enabled="false"
+                            android:enabled="@{vm.isAvailable()&amp;&amp;!vm.isEnabled()}"
+                            android:onClick="requestPermission"
                             android:stateListAnimator="@null"
-                            android:text="@string/activate_spaced"
-                            app:cornerRadius="24dp"
+                            android:text="@{vm.isEnabled()?@string/activated_spaced:@string/activate_spaced}"
+                            android:textColor="@color/color_status_text"
+                            app:cornerRadius="@dimen/corner_btn"
                             app:icon="@drawable/ic_baseline_bolt_24"
                             app:iconGravity="textStart"
+                            app:iconTint="@color/color_status_icon"
+                            app:strokeColor="@color/color_status_stroke"
                             app:strokeWidth="1dp" />
 
                         <com.google.android.material.button.MaterialButton
@@ -168,10 +176,12 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_weight="1"
+                            android:activated="@{vm.isInstalled()}"
+                            android:onClick="performShizukuAction"
                             android:stateListAnimator="@null"
-                            android:text="@string/install_shizuku"
-                            app:cornerRadius="24dp"
-                            app:icon="@drawable/ic_baseline_download_24"
+                            android:text="@{vm.isInstalled()?@string/launch_shizuku_client:@string/install_shizuku}"
+                            app:cornerRadius="@dimen/corner_btn"
+                            app:icon="@drawable/ic_shizuku_action"
                             app:iconGravity="textStart"
                             app:strokeColor="?colorPrimary"
                             app:strokeWidth="1dp" />
@@ -261,7 +271,6 @@
                         android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:background="?selectableItemBackgroundBorderless"
                         android:contentDescription="@string/enter"
                         android:src="@drawable/ic_baseline_chevron_right_24" />
                 </RelativeLayout>
@@ -301,7 +310,6 @@
                         android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:background="?selectableItemBackgroundBorderless"
                         android:contentDescription="@string/enter"
                         android:src="@drawable/ic_baseline_chevron_right_24" />
                 </RelativeLayout>
@@ -334,7 +342,7 @@
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
                     <TextView
-                        android:id="@+id/tv_more_caption"
+                        android:id="@+id/tv_caption_more"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_more"

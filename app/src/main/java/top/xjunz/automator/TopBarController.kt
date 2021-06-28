@@ -76,7 +76,7 @@ class TopBarController(private val topBar: View, private val scrollView: NestedS
             bringToFront()
             background = insetBack
             setOnApplyWindowInsetsListener { _, insets ->
-                val sysInsets = WindowInsetsCompat.toWindowInsetsCompat(insets).systemWindowInsets
+                val sysInsets = WindowInsetsCompat.toWindowInsetsCompat(insets).getInsets(WindowInsetsCompat.Type.systemBars())
                 OneShotPreDrawListener.add(this) {
                     scrollView.setPadding(0, height, 0, (sysInsets.bottom + margin).toInt())
                 }

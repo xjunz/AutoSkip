@@ -9,8 +9,9 @@
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
         <item name="colorOnSecondary">@color/secondaryTextColor</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:lineSpacingExtra">1dp</item>
     </style>
 </resources>

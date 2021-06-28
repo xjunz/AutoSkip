@@ -5,20 +5,22 @@ import top.xjunz.library.automator.IOnAccessibilityEventListener;
 import android.view.accessibility.AccessibilityNodeInfo;
 interface IAutomatorConnection {
 
-    void connect();
+    void connect()=1;
 
-    void disconnect();
+    void disconnect()=2;
 
-    Bitmap takeScreenshot(in Rect crop, int rotation);
+    Bitmap takeScreenshot(in Rect crop, int rotation)=3;
 
-    // Called from the system process.
-    oneway void shutdown();
+    void setOnAccessibilityEventListener(in IOnAccessibilityEventListener client)=4;
 
-    void setOnAccessibilityEventListener(in IOnAccessibilityEventListener client);
+    String sayHello()=5;
 
-    String sayHello();
+    boolean isConnnected()=6;
 
-    boolean isConnnected();
+    AccessibilityNodeInfo getRootInActiveWindow()=7;
 
-    AccessibilityNodeInfo getRootInActiveWindow();
+    long getStartTimestamp()=8;
+
+    void destroy() = 16777114; // Destroy method defined by Shizuku server
+
 }

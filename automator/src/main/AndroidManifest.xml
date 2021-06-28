@@ -8,7 +8,6 @@
             android:authorities="top.xjunz.automator.shizuku"
             android:enabled="true"
             android:exported="true"
-            android:multiprocess="false"
-            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+            android:multiprocess="false" />
     </application>
 </manifest>

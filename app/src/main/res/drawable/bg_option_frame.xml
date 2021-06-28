@@ -6,7 +6,7 @@
                 android:width="1dp"
                 android:color="@color/material_on_surface_stroke" />
             <corners android:radius="@dimen/corner_item" />
-            <solid android:color="@android:color/white" />
+            <solid android:color="?android:colorBackground" />
         </shape>
     </item>
     <item>
