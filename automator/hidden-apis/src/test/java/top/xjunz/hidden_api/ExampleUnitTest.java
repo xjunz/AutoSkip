@@ -1,5 +1,7 @@
 package top.xjunz.hidden_api;
 
+import android.os.SystemClock;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -10,8 +12,27 @@ import static org.junit.Assert.*;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class ExampleUnitTest {
+    final Object lock = new Object();
+
     @Test
-    public void addition_isCorrect() {
-        assertEquals(4, 2 + 2);
+    public void addition_isCorrect() throws InterruptedException {
+        synchronized (lock) {
+            new Thread() {
+                @Override
+                public void run() {
+                    super.run();
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    synchronized (lock) {
+                        lock.notify();
+                    }
+                }
+            }.start();
+            lock.wait();
+            System.out.println("Notified!");
+        }
     }
 }

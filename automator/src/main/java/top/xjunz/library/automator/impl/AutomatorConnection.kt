@@ -3,7 +3,6 @@ package top.xjunz.library.automator.impl
 import `$android`.app.UiAutomation
 import `$android`.app.UiAutomationConnection
 import android.accessibilityservice.AccessibilityServiceInfo
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.*
@@ -13,9 +12,6 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import moe.shizuku.server.IShizukuService
-import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuServiceConnections
 import top.xjunz.library.automator.IAutomatorConnection
 import top.xjunz.library.automator.IOnAccessibilityEventListener
 import java.util.*
@@ -96,7 +92,8 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
 
     override fun disconnect() {
         check(handlerThread.isAlive) { "Already disconnected!" }
-        try { //Calling mUiAutomation.disconnect() will cause an error, because our AccessibilityServiceClient
+        try {
+            //Calling mUiAutomation.disconnect() will cause an error, because our AccessibilityServiceClient
             //is injected without calling init(), then we just manually unregister the client via reflection.
             uiAutomation.javaClass.getDeclaredField("mUiAutomationConnection").apply {
                 isAccessible = true

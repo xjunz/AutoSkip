@@ -95,7 +95,7 @@
                         android:layout_alignParentEnd="true"
                         android:activated="@{vm.isRunning()}"
                         android:enabled="@{vm.isEnabled()&amp;&amp;!vm.isBinding()}"
-                        android:onClick="toggleService"
+                        android:onClick="@{()->vm.toggleService()}"
                         android:stateListAnimator="@null"
                         android:text="@{vm.isRunning()?@string/stop_spaced:@string/run_spaced}"
                         android:textColor="@color/color_status_text"

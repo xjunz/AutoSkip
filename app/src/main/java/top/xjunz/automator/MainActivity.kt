@@ -1,15 +1,10 @@
 package top.xjunz.automator
 
-import android.content.ComponentName
 import android.content.Intent
-import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import android.os.IBinder
-import android.os.RemoteException
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -17,13 +12,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuApiConstants
-import rikka.shizuku.ShizukuProvider
-import rikka.shizuku.ShizukuRemoteProcess
 import top.xjunz.automator.databinding.ActivityMainBinding
-import top.xjunz.library.automator.IAutomatorConnection
-import top.xjunz.library.automator.impl.AutomatorConnection
-import top.xjunz.library.automator.impl.getRunningProcess
 import java.util.*
 
 
@@ -48,7 +37,6 @@ class MainActivity : AppCompatActivity() {
                 vm = viewModel
             }
         initViews()
-        initShizuku()
     }
 
     private val statusObserver by lazy {
@@ -96,93 +84,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initShizuku() {
-        Shizuku.addBinderReceivedListenerSticky {
-            viewModel.apply {
-                isAvailable.value = true
-                isEnabled.value = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-                try {
-                    if (config.isLastRunning()) {
-                        Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-                    } else {
-                        Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, true)
-                    }
-                } catch (t: Throwable) {
-                    t.printStackTrace()
-                }
-            }
-        }
-        Shizuku.addBinderDeadListener {
-            viewModel.apply {
-                isAvailable.value = false
-                updateShizukuInstallationState()
-            }
-        }
-    }
-
-    private var automatorService: IAutomatorConnection? = null
-    private val userServiceStandaloneProcessArgs by lazy {
-        Shizuku.UserServiceArgs(ComponentName(BuildConfig.APPLICATION_ID, AutomatorConnection::class.java.name)).processNameSuffix("service").debuggable(BuildConfig.DEBUG).version(BuildConfig.VERSION_CODE)
-    }
-    private val userServiceConnection by lazy { //UiAutomation
-        object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-                if (binder != null && binder.pingBinder()) {
-                    automatorService = IAutomatorConnection.Stub.asInterface(binder)
-                    try {
-                        automatorService?.run {
-                            Log.i("automator", sayHello())
-                            if (!isConnnected) {
-                                connect()
-                            }
-                            viewModel.serviceStartTimestamp = startTimestamp
-                            mainHandler.post(updateDurationTask)
-                            viewModel.isRunning.value = true
-                            viewModel.isEnabled.value = true
-                        }
-                    } catch (e: RemoteException) {
-                        e.printStackTrace()
-                    }
-                }
-                viewModel.isBinding.value = false
-            }
-
-            override fun onServiceDisconnected(name: ComponentName?) {
-                viewModel.isRunning.value = false
-                viewModel.updateShizukuInstallationState()
-            }
-        }
-    }
-
-    fun bindAutomatorService(view: View) {
-        val result = StringBuilder()
-        try {
-            if (Shizuku.getVersion() < 10) {
-                result.append("requires Shizuku API 10")
-            } else {
-                Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-            }
-        } catch (tr: Throwable) {
-            tr.printStackTrace()
-            result.append(tr.toString())
-        }
-    }
-
     fun showTestPage(view: View) {
         supportFragmentManager.beginTransaction().add(R.id.scroll_view, TestFragment()).addToBackStack("test").commit()
     }
 
     fun showMenu(view: View) {}
-
-    fun toggleService(view: View) {
-        if (viewModel.isRunning.value == true) {
-            Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, true)
-            viewModel.isRunning.value = false
-        } else {
-            Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-            viewModel.isBinding.value = true
-        }
-    }
 
     private val downloadUrl by lazy {
         when (resources.configuration.locale.script) {

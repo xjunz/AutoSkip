@@ -1,5 +1,4 @@
 rootProject.name = "自动点击"
 include ':app'
 include ':automator'
-//include ':automator:hidden-apis'
 include ':automator:hidden-apis'
