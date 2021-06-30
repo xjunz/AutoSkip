@@ -9,10 +9,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.invoke
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import rikka.shizuku.Shizuku
 import top.xjunz.library.automator.IAutomatorConnection
 import top.xjunz.library.automator.AutomatorConnection
@@ -50,7 +47,7 @@ class AutomatorViewModel : ViewModel() {
         observeForever {
             if (it == false) {
                 isEnabled.value = false
-                isRunning.value = false
+               //isRunning.value = false
                 updateShizukuInstallationState()
             }
         }
@@ -135,18 +132,26 @@ class AutomatorViewModel : ViewModel() {
                 synchronized(lock) {
                     if (binder != null && binder.pingBinder()) {
                         val automatorService = IAutomatorConnection.Stub.asInterface(binder)
-                        try {
-                            automatorService?.run {
+                        automatorService?.run {
+                            try {
                                 Log.i(tag, sayHello())
+                                setShizukuBinder(Shizuku.getBinder())
+                                binder.linkToDeath(IBinder.DeathRecipient {
+                                    //todo(当Shizuku服务停止时，此binder不一定死亡，重新打开Shizuku服务，
+                                    // 会回调bindRunningServiceOrKill方法，最后在connect处抛出DeadObjectException，确认原因)
+                                    Log.i(tag,binder.toString())
+                                    isRunning.postValue(false)
+                                    updateShizukuInstallationState()
+                                }, 0)
                                 if (!isConnnected) {
                                     connect()
                                 }
                                 Log.i(tag, "Automator connected successfully!")
                                 serviceStartTimestamp = startTimestamp
                                 isRunning.value = true
+                            } catch (t: Throwable) {
+                                t.printStackTrace()
                             }
-                        } catch (t: Throwable) {
-                            t.printStackTrace()
                         }
                     }
                     isBinding.value = false
@@ -169,7 +174,7 @@ class AutomatorViewModel : ViewModel() {
     private fun bindServiceLocked(): Boolean = synchronized(lock) {
         try {
             Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-            lock.wait()
+            lock.wait(6180)
         } catch (t: Throwable) {
             t.printStackTrace()
             return false
@@ -189,7 +194,6 @@ class AutomatorViewModel : ViewModel() {
 
     fun unbindService(kill: Boolean): Boolean = try {
         Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, kill)
-        isRunning.value = false
         true
     } catch (t: Throwable) {
         t.printStackTrace()
@@ -216,5 +220,4 @@ class AutomatorViewModel : ViewModel() {
             isAvailable.value = false
         }
     }
-
 }

@@ -12,6 +12,7 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import rikka.shizuku.Shizuku
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -35,13 +36,17 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     private var startTimestamp = -1L
     private lateinit var uiAutomation: UiAutomation
     override fun connect() {
-        Log.i(TAG, "v12")
         check(!handlerThread.isAlive) { "Already connected!" }
-        handlerThread.start()
-        uiAutomation = UiAutomation(handlerThread.looper, UiAutomationConnection())
-        uiAutomation.connect()
-        startMonitor()
-        startTimestamp = System.currentTimeMillis()
+        try {
+            handlerThread.start()
+            uiAutomation = UiAutomation(handlerThread.looper, UiAutomationConnection())
+            uiAutomation.connect()
+            startMonitor()
+            startTimestamp = System.currentTimeMillis()
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            exitProcess(0)
+        }
     }
 
     private var lastHandledNodeInfo: AccessibilityNodeInfo? = null
@@ -64,9 +69,21 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
                 uiAutomation.rootInActiveWindow ?: return@setOnAccessibilityEventListener
             windowInfo.findAccessibilityNodeInfosByText("跳过")?.forEach { node ->
                 Log.i(TAG, "duration: ${System.currentTimeMillis() - lastHandleTimestamp}")
-                Log.i(TAG, "last: $lastHandledNodeInfo cur: $node, equal?: ${Objects.equals(lastHandledNodeInfo, node)}")
+                Log.i(
+                    TAG,
+                    "last: $lastHandledNodeInfo cur: $node, equal?: ${
+                        Objects.equals(
+                            lastHandledNodeInfo,
+                            node
+                        )
+                    }"
+                )
                 //distinct nodes within 500 milliseconds
-                if (System.currentTimeMillis() - lastHandleTimestamp < 500 && Objects.equals(lastHandledNodeInfo, node)) {
+                if (System.currentTimeMillis() - lastHandleTimestamp < 500 && Objects.equals(
+                        lastHandledNodeInfo,
+                        node
+                    )
+                ) {
                     return@forEach
                 }
                 val text = node.text
@@ -82,7 +99,14 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
                         val rect = Rect()
                         node.getBoundsInScreen(rect)
                         val downAction =
-                            MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, rect.exactCenterX(), rect.exactCenterY(), 0)
+                            MotionEvent.obtain(
+                                downTime,
+                                downTime,
+                                MotionEvent.ACTION_DOWN,
+                                rect.exactCenterX(),
+                                rect.exactCenterY(),
+                                0
+                            )
                         downAction.source = InputDevice.SOURCE_TOUCHSCREEN
                         uiAutomation.injectInputEvent(downAction, true)
                         val upAction =
@@ -115,7 +139,8 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         }
     }
 
-    override fun sayHello() = "Hello from remote service! My uid is ${Os.geteuid()} & my pid is ${Os.getpid()}"
+    override fun sayHello() =
+        "Hello from remote service! My uid is ${Os.geteuid()} & my pid is ${Os.getpid()}"
 
     override fun isConnnected() = handlerThread.isAlive
 
@@ -124,6 +149,17 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     override fun setConfig(config: AutomatorConfig?) {
         if (config != null) {
             this.config = config
+        }
+    }
+
+    override fun setShizukuBinder(binder: IBinder?) {
+        if (binder != null && binder.pingBinder()) {
+            binder.linkToDeath(IBinder.DeathRecipient {
+                Log.i(TAG, "Exit due to Shizuku service is dead")
+                exitProcess(0)
+            }, 0)
+        } else {
+            exitProcess(0)
         }
     }
 
