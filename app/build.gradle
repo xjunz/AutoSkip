@@ -10,6 +10,21 @@ hiddenApiRefine {
     // Print log, default is true
     log = true
 }
+
+int incrementRefine() {
+    Properties properties = new Properties()
+    String fileName = "custom.properties"
+    def key = "build.refine"
+    File propertyFile = new File(rootDir.getAbsoluteFile(), fileName)
+    properties.load(propertyFile.newDataInputStream())
+    def refine = properties.getProperty(key).toInteger() + 1
+    properties.setProperty(key, refine.toString())
+    properties.store(propertyFile.newDataOutputStream(), 'Increment this value on every single build. ' +
+            'You can access this value by calling BuildConfig.REFINE')
+    return refine
+}
+
+def refine = incrementRefine()
 android {
     compileSdkVersion 30
 
@@ -18,15 +33,21 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "int", "REFINE", refine.toString()
+        buildConfigField "String", "VERSION_NAME", "\"" + versionName + ".r" + refine + "\""
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+            buildConfigField "String", "VERSION_NAME", "\"" + android.defaultConfig.versionName + ".r" + refine + "-debug\""
         }
     }
     buildFeatures {
