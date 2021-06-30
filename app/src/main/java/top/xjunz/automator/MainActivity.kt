@@ -12,6 +12,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import rikka.shizuku.Shizuku
+import rikka.shizuku.ShizukuServiceConnections
 import top.xjunz.automator.databinding.ActivityMainBinding
 import java.util.*
 
@@ -31,8 +32,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding =
-            DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main).apply {
+        binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+            .apply {
                 lifecycleOwner = this@MainActivity
                 vm = viewModel
             }
@@ -57,10 +58,10 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         TopBarController(binding.topBar, binding.scrollView).init()
         viewModel.apply {
-            isAvailable.value = false
             isEnabled.observe(this@MainActivity, statusObserver)
             isRunning.observe(this@MainActivity, statusObserver)
             updateShizukuInstallationState()
+            init()
         }
     }
 
@@ -76,8 +77,8 @@ class MainActivity : AppCompatActivity() {
         override fun run() {
             if (viewModel.serviceStartTimestamp > 0) {
                 (System.currentTimeMillis() - viewModel.serviceStartTimestamp).let {
-                    binding.tvCaptionStatus.text =
-                        String.format(getString(R.string.format_running_duration), it / 3_600_000, it / 60_000 % 60, it / 1000 % 60)
+                    binding.tvCaptionStatus.text = String.format(getString(R.string.format_running_duration),
+                        it / 3_600_000, it / 60_000 % 60, it / 1000 % 60)
                 }
             }
             mainHandler.postDelayed(this, 1000)
@@ -111,9 +112,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (viewModel.isAvailable.value == true) {
-            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                viewModel.isEnabled.value = true
-            }
+            viewModel.isEnabled.value = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
         }
     }
 
@@ -134,5 +133,10 @@ class MainActivity : AppCompatActivity() {
                 viewModel.isEnabled.value = true
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.unbindService(false)
     }
 }

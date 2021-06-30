@@ -1,4 +1,4 @@
-package top.xjunz.library.automator.impl
+package top.xjunz.library.automator
 
 import `$android`.app.UiAutomation
 import `$android`.app.UiAutomationConnection
@@ -12,8 +12,6 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import top.xjunz.library.automator.IAutomatorConnection
-import top.xjunz.library.automator.IOnAccessibilityEventListener
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -26,6 +24,11 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     companion object {
         private const val HANDLER_THREAD_NAME = "AutomatorHandlerThread"
         const val TAG = "automator"
+    }
+
+    private var config: AutomatorConfig = AutomatorConfig().apply {
+        fallbackInjectingEvents = true
+        detectRegion = true
     }
 
     private val handlerThread = HandlerThread(HANDLER_THREAD_NAME)
@@ -50,7 +53,11 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
                 AccessibilityEvent.TYPE_WINDOWS_CHANGED or AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED //flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS or AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
         }
         uiAutomation.setOnAccessibilityEventListener { event ->
-            if (event.packageName?.startsWith("com.android") == true) {
+            if (event.packageName == null) {
+                return@setOnAccessibilityEventListener
+            }
+            //filter out system apps
+            if (event.packageName.startsWith("com.android")) {
                 return@setOnAccessibilityEventListener
             }
             val windowInfo =
@@ -58,6 +65,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
             windowInfo.findAccessibilityNodeInfosByText("跳过")?.forEach { node ->
                 Log.i(TAG, "duration: ${System.currentTimeMillis() - lastHandleTimestamp}")
                 Log.i(TAG, "last: $lastHandledNodeInfo cur: $node, equal?: ${Objects.equals(lastHandledNodeInfo, node)}")
+                //distinct nodes within 500 milliseconds
                 if (System.currentTimeMillis() - lastHandleTimestamp < 500 && Objects.equals(lastHandledNodeInfo, node)) {
                     return@forEach
                 }
@@ -107,17 +115,17 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         }
     }
 
-    override fun takeScreenshot(crop: Rect?, rotation: Int): Bitmap? = uiAutomation.takeScreenshot()
-
-    override fun setOnAccessibilityEventListener(client: IOnAccessibilityEventListener?) = uiAutomation.setOnAccessibilityEventListener { event -> client!!.onAccessibilityEvent(event) }
-
     override fun sayHello() = "Hello from remote service! My uid is ${Os.geteuid()} & my pid is ${Os.getpid()}"
 
     override fun isConnnected() = handlerThread.isAlive
 
-    override fun getRootInActiveWindow(): AccessibilityNodeInfo = uiAutomation.rootInActiveWindow
-
     override fun getStartTimestamp() = startTimestamp
+
+    override fun setConfig(config: AutomatorConfig?) {
+        if (config != null) {
+            this.config = config
+        }
+    }
 
     override fun destroy() {
         Log.i(TAG, "Goodbye, world!")

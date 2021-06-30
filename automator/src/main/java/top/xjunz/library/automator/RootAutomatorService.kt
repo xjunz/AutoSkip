@@ -1,4 +1,4 @@
-package top.xjunz.library.automator.impl
+package top.xjunz.library.automator
 
 import `$android`.hardware.input.InputManager
 import android.os.Build

@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.IBinder
-import android.os.RemoteException
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,16 +12,18 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
 import top.xjunz.library.automator.IAutomatorConnection
-import top.xjunz.library.automator.impl.AutomatorConnection
-import java.io.DataOutputStream
+import top.xjunz.library.automator.AutomatorConnection
 
 
 /**
  * @author xjunz 2021/6/26
  */
 class AutomatorViewModel : ViewModel() {
+    private val tag = "Automator"
+
     /**
      * Whether we have got the Shizuku permission or not. When [isAvailable] becomes false,
      * this value is also treated as false.
@@ -50,6 +51,7 @@ class AutomatorViewModel : ViewModel() {
             if (it == false) {
                 isEnabled.value = false
                 isRunning.value = false
+                updateShizukuInstallationState()
             }
         }
     }
@@ -83,38 +85,42 @@ class AutomatorViewModel : ViewModel() {
     /**
      * "Destroy what you could not control."
      */
-    @Suppress("DEPRECATION")
-    fun bindRunningServiceOrKill() {
-        viewModelScope.launch {
-            var bound: Boolean? = null
-            Dispatchers.IO.invoke {
-                //Shizuku has no build-in apis to judge whether a user service
-                //is still alive or not. Then we fallback using the 'ps' cmd.
-                Shizuku.newProcess(arrayOf("ps", "-A", "-o", "pid", "-o", "name"), null, "/")
-                    .apply {
-                        val pid2kill = mutableListOf<String>()
-                        inputStream.bufferedReader().useLines { sequence ->
-                            sequence.forEach { line ->
-                                //Try bound any service once, if one service has been bound, just kill other services
-                                if (line.endsWith(serviceName) /*&& (bound == true || (bound == null &&
-                                            bindServiceLocked().also { bound = it }.not()))*/) {
-                                    pid2kill.add(line.trimIndent().split(" ")[0])
-                                    //Shizuku.newProcess(arrayOf("kill", line.trimIndent().split(" ")[0]), null, "/")
+    @Suppress("Deprecation")
+    fun bindRunningServiceOrKill() = viewModelScope.launch {
+        isBinding.value = true
+        var bound: Boolean? = null
+        withContext(Dispatchers.IO) {
+            //Shizuku has no build-in apis to judge whether a user service
+            //is still alive or not. Then we fallback using the 'ps' cmd.
+            Shizuku.newProcess(arrayOf("ps", "-A", "-o", "pid", "-o", "name"), null, "/")
+                .apply {
+                    inputStream.bufferedReader().useLines { sequence ->
+                        sequence.forEach { line ->
+                            //Try bind any service once, if one service has been bound, just kill the other services
+                            if (line.endsWith(serviceName)) {
+                                val pid = line.trimIndent().split(" ")[0]
+                                if (bound == null) {
+                                    bound = bindServiceLocked()
+                                    if (bound != true) {
+                                        killProcess(pid)
+                                    }
+                                } else {
+                                    killProcess(pid)
                                 }
                             }
                         }
-                        pid2kill.forEach {
-                            val out = DataOutputStream(outputStream)
-                            out.writeBytes("kill $it\n")
-                            out.flush()
-
-                            out.writeBytes("exit\n")
-                            out.flush()
-                            waitFor()
-                        }
                     }
-            }
-            isRunning.value = bound == true
+                }.destroy()
+        }
+        isBinding.value = false
+    }
+
+    @Suppress("Deprecation")
+    private fun killProcess(pid: String) {
+        //outputStream.write() seems not working, have to create a new process
+        Shizuku.newProcess(arrayOf("kill", pid), null, "/").apply {
+            waitFor()
+            destroy()
         }
     }
 
@@ -131,16 +137,16 @@ class AutomatorViewModel : ViewModel() {
                         val automatorService = IAutomatorConnection.Stub.asInterface(binder)
                         try {
                             automatorService?.run {
-                                Log.i("automator", sayHello())
+                                Log.i(tag, sayHello())
                                 if (!isConnnected) {
                                     connect()
                                 }
+                                Log.i(tag, "Automator connected successfully!")
                                 serviceStartTimestamp = startTimestamp
                                 isRunning.value = true
-                                isEnabled.value = true
                             }
-                        } catch (e: RemoteException) {
-                            e.printStackTrace()
+                        } catch (t: Throwable) {
+                            t.printStackTrace()
                         }
                     }
                     isBinding.value = false
@@ -154,28 +160,16 @@ class AutomatorViewModel : ViewModel() {
             }
         }
     }
-    private val userServiceConnectionLocked by lazy {
-        object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-                userServiceConnection.onServiceConnected(name, binder)
-                synchronized(lock) {
-                    lock.notify()
-                }
-            }
-
-            override fun onServiceDisconnected(name: ComponentName?) {
-                userServiceConnection.onServiceDisconnected(name)
-            }
-        }
-    }
 
     private val lock = Object()
 
+    /**
+     * Bind the service and wait the service to return the binding result.
+     */
     private fun bindServiceLocked(): Boolean = synchronized(lock) {
         try {
-            isBinding.postValue(true)
             Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-            lock.wait(6800)
+            lock.wait()
         } catch (t: Throwable) {
             t.printStackTrace()
             return false
@@ -193,8 +187,8 @@ class AutomatorViewModel : ViewModel() {
         false
     }
 
-    private fun unbindService(): Boolean = try {
-        Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, true)
+    fun unbindService(kill: Boolean): Boolean = try {
+        Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, kill)
         isRunning.value = false
         true
     } catch (t: Throwable) {
@@ -204,13 +198,13 @@ class AutomatorViewModel : ViewModel() {
 
     fun toggleService() {
         if (isRunning.value == true) {
-            unbindService()
+            unbindService(true)
         } else {
             bindService()
         }
     }
 
-    init {
+    fun init() {
         Shizuku.addBinderReceivedListenerSticky {
             isAvailable.value = true
             isEnabled.value = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
@@ -220,7 +214,6 @@ class AutomatorViewModel : ViewModel() {
         }
         Shizuku.addBinderDeadListener {
             isAvailable.value = false
-            updateShizukuInstallationState()
         }
     }
 

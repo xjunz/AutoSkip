@@ -85,7 +85,7 @@
                         android:layout_below="@id/tv_service_status"
                         android:layout_marginTop="8dp"
                         android:typeface="monospace"
-                        tools:text="@string/pls_activate_service" />
+                        android:text="@string/pls_activate_service" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_run"

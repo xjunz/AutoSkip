@@ -19,12 +19,14 @@ class AutomatorApp : Application() {
 
     class Config {
         companion object {
-            private const val key_last_running = "last_running"
+            private const val key_fallback_injecting_events = "fallback_injecting_events"
+            private const val key_region_aware = "region_aware"
         }
 
-        fun isLastRunning() = sharedPreferences.getBoolean(key_last_running, false)
+        fun shouldFallbackInjectingEvents() = sharedPreferences.getBoolean(key_fallback_injecting_events, false)
 
-        fun recordRunningState(running: Boolean) = sharedPreferences.edit().putBoolean(key_last_running, running).apply()
+        fun setFallbackInjectingEvents(running: Boolean) = sharedPreferences.edit().putBoolean(key_fallback_injecting_events, running).apply()
+
     }
 
     override fun onCreate() {
