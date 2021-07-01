@@ -4,6 +4,8 @@ package top.xjunz.library.automator;
 import top.xjunz.library.automator.AutomatorConfig;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
+
 interface IAutomatorConnection {
 
     void connect()=1;
@@ -18,7 +20,11 @@ interface IAutomatorConnection {
 
     void setConfig(in AutomatorConfig config)=9;
 
-    void setShizukuBinder(in IBinder binder)=10;
+    int getPid()=10;
+
+    int getSkippedTimes()=11;
+
+    void setFileDescriptors(in ParcelFileDescriptor pfd)=12;
 
     void destroy() = 16777114; // Destroy method defined by Shizuku server
 

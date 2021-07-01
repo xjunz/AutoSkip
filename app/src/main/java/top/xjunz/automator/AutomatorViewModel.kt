@@ -4,15 +4,26 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.os.DeadObjectException
 import android.os.IBinder
+import android.os.ParcelFileDescriptor
+import android.os.Process
+import android.system.Os
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
-import top.xjunz.library.automator.IAutomatorConnection
 import top.xjunz.library.automator.AutomatorConnection
+import top.xjunz.library.automator.IAutomatorConnection
+import java.io.File
+import java.io.FileDescriptor
+import java.io.FileInputStream
+import java.io.FileOutputStream
 
 
 /**
@@ -47,11 +58,12 @@ class AutomatorViewModel : ViewModel() {
         observeForever {
             if (it == false) {
                 isEnabled.value = false
-               //isRunning.value = false
                 updateShizukuInstallationState()
             }
         }
     }
+
+    val skippedTimes = MutableLiveData<Int>()
 
     /**
      * Whether the Shizuku client is installed. When this is false, everything is false, of course.
@@ -62,6 +74,10 @@ class AutomatorViewModel : ViewModel() {
      * The millisecond timestamp when our service is started.
      */
     var serviceStartTimestamp = -1L
+
+    var servicePid = -1
+
+    var filePath: String? = null
 
     /**
      * Check whether the Shizuku client is installed on this device.
@@ -135,22 +151,25 @@ class AutomatorViewModel : ViewModel() {
                         automatorService?.run {
                             try {
                                 Log.i(tag, sayHello())
-                                setShizukuBinder(Shizuku.getBinder())
-                                binder.linkToDeath(IBinder.DeathRecipient {
-                                    //todo(当Shizuku服务停止时，此binder不一定死亡，重新打开Shizuku服务，
-                                    // 会回调bindRunningServiceOrKill方法，最后在connect处抛出DeadObjectException，确认原因)
-                                    Log.i(tag,binder.toString())
-                                    isRunning.postValue(false)
-                                    updateShizukuInstallationState()
-                                }, 0)
                                 if (!isConnnected) {
                                     connect()
+                                    Log.i(tag, "Automator connected successfully!")
                                 }
-                                Log.i(tag, "Automator connected successfully!")
+                                setFileDescriptors(ParcelFileDescriptor.open(File(filePath!!),
+                                    ParcelFileDescriptor.MODE_READ_WRITE
+                                            or ParcelFileDescriptor.MODE_APPEND.inv()))
+                                servicePid = pid
                                 serviceStartTimestamp = startTimestamp
                                 isRunning.value = true
                             } catch (t: Throwable) {
                                 t.printStackTrace()
+                                //This happens when our service is still running while the binder
+                                //is disconnected. Just kill what we could not control.
+                                if (t is DeadObjectException) {
+                                    if (!unbindService(true) && servicePid > 0) {
+                                        killProcess(servicePid.toString())
+                                    }
+                                }
                             }
                         }
                     }
@@ -189,11 +208,13 @@ class AutomatorViewModel : ViewModel() {
         true
     } catch (t: Throwable) {
         t.printStackTrace()
+        isBinding.value = false
         false
     }
 
     fun unbindService(kill: Boolean): Boolean = try {
         Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, kill)
+        isRunning.value = false
         true
     } catch (t: Throwable) {
         t.printStackTrace()
@@ -206,6 +227,30 @@ class AutomatorViewModel : ViewModel() {
         } else {
             bindService()
         }
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    fun initSkippedTimes(file: File) = viewModelScope.launch {
+        filePath = file.path
+        var times: Int? = null
+        withContext(Dispatchers.IO) {
+            if (file.exists()) {
+                FileInputStream(file).bufferedReader().useLines {
+                    it.forEach { line ->
+                        times = line.toIntOrNull()
+                        return@useLines
+                    }
+                }
+            }
+            if (times == null) {
+                FileOutputStream(file).bufferedWriter().use {
+                    it.write('0'.code)
+                    it.flush()
+                }
+                times = 0
+            }
+        }
+        skippedTimes.value = times
     }
 
     fun init() {

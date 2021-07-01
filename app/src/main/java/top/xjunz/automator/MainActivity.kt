@@ -14,6 +14,10 @@ import androidx.lifecycle.ViewModelProvider
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuServiceConnections
 import top.xjunz.automator.databinding.ActivityMainBinding
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
 import java.util.*
 
 
@@ -40,17 +44,45 @@ class MainActivity : AppCompatActivity() {
         initViews()
     }
 
+    private fun createRecordFile() {
+        val file = getFileStreamPath("times")
+        if (file.exists()) {
+            FileInputStream(file).bufferedReader().useLines {
+                it.forEach { line ->
+                    val times = line.toIntOrNull()
+                    if (times == null) {
+                        return@useLines
+                    } else {
+                        viewModel.skippedTimes.postValue(times)
+                    }
+                    return@forEach
+                }
+            }
+        }
+
+        FileOutputStream(file).bufferedWriter()
+
+    }
+
     private val statusObserver by lazy {
         Observer<Boolean> {
             mainHandler.removeCallbacks(updateDurationTask)
-            if (viewModel.isEnabled.value == true) {
-                if (viewModel.isRunning.value == true) {
-                    mainHandler.post(updateDurationTask)
+            if (viewModel.isAvailable.value == true) {
+                if (viewModel.isEnabled.value == true) {
+                    if (viewModel.isRunning.value == true) {
+                        mainHandler.post(updateDurationTask)
+                    } else {
+                        binding.tvCaptionStatus.setText(R.string.pls_start_service)
+                    }
                 } else {
-                    binding.tvCaptionStatus.setText(R.string.pls_start_service)
+                    binding.tvCaptionStatus.setText(R.string.pls_activate_service)
                 }
             } else {
-                binding.tvCaptionStatus.setText(R.string.pls_activate_service)
+                if (viewModel.isRunning.value == true) {
+                    binding.tvCaptionStatus.setText(R.string.uncontrollable_service)
+                } else {
+                    binding.tvCaptionStatus.setText(R.string.pls_activate_service)
+                }
             }
         }
     }
@@ -58,10 +90,12 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         TopBarController(binding.topBar, binding.scrollView).init()
         viewModel.apply {
+            init()
             isEnabled.observe(this@MainActivity, statusObserver)
             isRunning.observe(this@MainActivity, statusObserver)
+            isAvailable.observe(this@MainActivity, statusObserver)
             updateShizukuInstallationState()
-            init()
+            initSkippedTimes(getFileStreamPath("times"))
         }
     }
 
@@ -138,5 +172,10 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.unbindService(false)
+    }
+
+    fun testAvailability(view: View) {
+        viewModel.isAvailable.value = false
+        viewModel.isRunning.value = true
     }
 }

@@ -44,6 +44,10 @@ public class UiAutomation {
         throw new RuntimeException("Stub!");
     }
 
+    /**
+     * Seems not working well on shell mode.
+     * @see <a href="https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/app/UiAutomationConnection.java;drc=master;bpv=1;bpt=1;l=522?gsn=throwIfCalledByNotTrustedUidLocked&gs=kythe%3A%2F%2Fandroid.googlesource.com%2Fplatform%2Fsuperproject%3Flang%3Djava%3Fpath%3Dandroid.app.UiAutomationConnection%239c958fde171037a7b636674d1d8d5767332c52ccab8f1289f4ea5e46acd0d56e"/>
+     */
     public boolean injectInputEvent(InputEvent event, boolean sync) {
         throw new RuntimeException("Stub!");
     }

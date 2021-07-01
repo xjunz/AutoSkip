@@ -84,8 +84,8 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_service_status"
                         android:layout_marginTop="8dp"
-                        android:typeface="monospace"
-                        android:text="@string/pls_activate_service" />
+                        android:text="@string/pls_activate_service"
+                        android:typeface="monospace" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_run"
@@ -93,6 +93,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
                         android:activated="@{vm.isRunning()}"
                         android:enabled="@{vm.isEnabled()&amp;&amp;!vm.isBinding()}"
                         android:onClick="@{()->vm.toggleService()}"
@@ -195,6 +196,7 @@
                     android:background="@drawable/bg_option_frame"
                     android:clickable="true"
                     android:focusable="true"
+                    android:onClick="testAvailability"
                     android:padding="16dp">
 
                     <ImageView
@@ -264,7 +266,7 @@
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
                         android:layout_toEndOf="@id/iv_stats"
-                        android:text="@string/format_total_count" />
+                        android:text="@{@string/format_total_count(vm.skippedTimes)}" />
 
                     <ImageView
                         android:layout_width="32dp"

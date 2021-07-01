@@ -11,5 +11,5 @@ import rikka.shizuku.SystemServiceHelper
 private val activityManager by lazy {
     IActivityManager.Stub.asInterface(ShizukuBinderWrapper(SystemServiceHelper.getSystemService(Context.ACTIVITY_SERVICE)))
 }
-
 fun getRunningProcess() = activityManager.runningAppProcesses
+fun getRunningTasks() = activityManager.getTasks(1)
