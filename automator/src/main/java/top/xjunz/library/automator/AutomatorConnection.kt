@@ -4,7 +4,6 @@ import `$android`.app.UiAutomation
 import `$android`.app.UiAutomationConnection
 import `$android`.hardware.input.InputManager
 import android.accessibilityservice.AccessibilityServiceInfo
-import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.*
 import android.system.Os
@@ -13,11 +12,7 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.OutputStream
-import java.io.PrintStream
-import java.lang.Process
+import java.io.*
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -32,10 +27,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         const val TAG = "automator"
     }
 
-    private var config: AutomatorConfig = AutomatorConfig().apply {
-        fallbackInjectingEvents = true
-        detectRegion = true
-    }
+    private var config: AutomatorConfig = AutomatorConfig()
 
     private val handlerThread = HandlerThread(HANDLER_THREAD_NAME)
     private var startTimestamp = -1L
@@ -68,8 +60,24 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         }
     }
 
-    private var lastHandledNodeInfo: AccessibilityNodeInfo? = null
-    private var lastHandleTimestamp = 0L
+    private var previousNode: AccessibilityNodeInfo? = null
+    private var previousTimestamp = 0L
+
+    private fun logFilteredNode(node: AccessibilityNodeInfo, reason: String) {
+        val region = Rect()
+        node.getBoundsInScreen(region)
+        Log.i(TAG, "Filtered out node: ${node.packageName}:${node.className.toString().substringAfterLast('.')}:${node.text}, $region" +
+                "\ndue to $reason")
+    }
+
+    private fun containsNumberNoRegex(cs: CharSequence): Boolean {
+        cs.asIterable().forEach {
+            if (it in '0'..'9') {
+                return true
+            }
+        }
+        return false
+    }
 
     private fun startMonitoring() {
         uiAutomation.serviceInfo = AccessibilityServiceInfo().apply {
@@ -77,58 +85,93 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
                 AccessibilityEvent.TYPE_WINDOWS_CHANGED or AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED //flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS or AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
         }
         uiAutomation.setOnAccessibilityEventListener { event ->
-            if (event.packageName == null) {
-                return@setOnAccessibilityEventListener
-            }
+            val packageName = event.packageName ?: return@setOnAccessibilityEventListener
             //filter out system apps
-            if (event.packageName.startsWith("com.android")) {
+            if (packageName.startsWith("com.android")) {
                 return@setOnAccessibilityEventListener
             }
             val windowInfo = uiAutomation.rootInActiveWindow ?: return@setOnAccessibilityEventListener
+            //strict filter: child count
+            Log.i(TAG, "Child count: ${windowInfo.childCount}")
             windowInfo.findAccessibilityNodeInfosByText("跳过")?.forEach { node ->
                 //distinct nodes within 500 milliseconds
-                if (System.currentTimeMillis() - lastHandleTimestamp < 500 && Objects.equals(lastHandledNodeInfo, node)) {
-                    return@forEach
+                if (System.currentTimeMillis() - previousTimestamp < 500 && Objects.equals(previousNode, node)) {
+                    return@setOnAccessibilityEventListener
                 }
-                val text = node.text
-                if (text?.contains(Regex("\\d")) == true) {
-                    if (node.isClickable) {
-                        Log.i(TAG, node.toString())
-                        Log.i(TAG, "Skipped!")
-                        node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                        skippedTimes++
-                    } else {
-                        /*node.parent?.run {
-                            if(isClickable){
-                                performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                            }
-                        }?: */run {
-                            //fallback
-                            Log.i(TAG, node.toString())
-                            Log.i(TAG, "Fallback!")
-                            val downTime = SystemClock.uptimeMillis()
-                            val rect = Rect()
-                            node.getBoundsInScreen(rect)
-                            val downAction = MotionEvent.obtain(
-                                downTime,
-                                downTime,
-                                MotionEvent.ACTION_DOWN,
-                                rect.exactCenterX(),
-                                rect.exactCenterY(),
-                                0)
-                            downAction.source = InputDevice.SOURCE_TOUCHSCREEN
-                            inputManager.injectInputEvent(downAction, 2)
-                            val upAction =
-                                MotionEvent.obtain(downAction).apply { action = MotionEvent.ACTION_UP }
-                            inputManager.injectInputEvent(upAction, 2)
-                            upAction.recycle()
-                            downAction.recycle()
-                            skippedTimes++
-                        }
-
+                previousNode = node
+                previousTimestamp = System.currentTimeMillis()
+                val windowRect = Rect()
+                windowInfo.getBoundsInScreen(windowRect)
+                val nodeRect = Rect()
+                node.getBoundsInScreen(nodeRect)
+                if (config.checkSize) {
+                    val nw = nodeRect.width().coerceAtMost(nodeRect.height())
+                    val nh = nodeRect.width().coerceAtLeast(nodeRect.height())
+                    val ww = windowRect.width().coerceAtMost(windowRect.height())
+                    val wh = windowRect.width().coerceAtLeast(windowRect.height())
+                    if (nw >= ww / 2) {
+                        logFilteredNode(node, "width too large")
+                        return@setOnAccessibilityEventListener
                     }
-                    lastHandledNodeInfo = node
-                    lastHandleTimestamp = System.currentTimeMillis()
+                    if (nh >= wh / 4) {
+                        logFilteredNode(node, "height too large")
+                        return@setOnAccessibilityEventListener
+                    }
+                }
+                if (config.checkRegion) {
+                    if (nodeRect.exactCenterX() > windowRect.width() / 4f && nodeRect.exactCenterX() < windowRect.width() / 4f * 3) {
+                        logFilteredNode(node, "out of x range")
+                        return@setOnAccessibilityEventListener
+                    }
+                    if (nodeRect.exactCenterY() > windowRect.height() / 4f && nodeRect.exactCenterY() < windowRect.height() / 4f * 3) {
+                        logFilteredNode(node, "out of y range")
+                        return@setOnAccessibilityEventListener
+                    }
+                }
+                if (config.checkDigit) {
+                    if (!containsNumberNoRegex(node.text)) {
+                        logFilteredNode(node, "no digit")
+                        return@setOnAccessibilityEventListener
+                    }
+                }
+                if (node.isClickable) {
+                    node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    skippedTimes++
+                } else {
+                    node.parent?.run {
+                        if (isClickable) {
+                            val parentRect = Rect()
+                            if (parentRect.width() > 2 * nodeRect.width() || parentRect.height() > 2 * nodeRect.height()) {
+                                logFilteredNode(node, "parent too large")
+                                return@run
+                            }
+                            performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                            return@setOnAccessibilityEventListener
+                        }
+                        logFilteredNode(node, "parent not clickable")
+                    }
+                    if (config.fallbackInjectingEvents) {
+                        //fallback
+                        Log.i(TAG, "Fallback!")
+                        val downTime = SystemClock.uptimeMillis()
+                        val rect = Rect()
+                        node.getBoundsInScreen(rect)
+                        val downAction = MotionEvent.obtain(
+                            downTime,
+                            downTime,
+                            MotionEvent.ACTION_DOWN,
+                            rect.exactCenterX(),
+                            rect.exactCenterY(),
+                            0)
+                        downAction.source = InputDevice.SOURCE_TOUCHSCREEN
+                        inputManager.injectInputEvent(downAction, 2)
+                        val upAction =
+                            MotionEvent.obtain(downAction).apply { action = MotionEvent.ACTION_UP }
+                        inputManager.injectInputEvent(upAction, 2)
+                        upAction.recycle()
+                        downAction.recycle()
+                        skippedTimes++
+                    }
                 }
             }
         }
@@ -170,12 +213,10 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     override fun setFileDescriptors(pfd: ParcelFileDescriptor?) {
         FileInputStream(pfd!!.fileDescriptor).bufferedReader().useLines { s ->
             s.forEach {
-                Log.i(TAG, it)
+                skippedTimes = it.toIntOrNull() ?: 0
             }
         }
-        FileOutputStream(pfd.fileDescriptor).also { outputStream = it }
-        val bmap = uiAutomation.takeScreenshot()
-        bmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        outputStream = FileOutputStream(pfd.fileDescriptor)
     }
 
     fun setFilePath(path: String?) {
