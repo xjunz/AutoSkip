@@ -11,13 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuServiceConnections
 import top.xjunz.automator.databinding.ActivityMainBinding
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io.*
 import java.util.*
 
 
@@ -42,26 +39,6 @@ class MainActivity : AppCompatActivity() {
                 vm = viewModel
             }
         initViews()
-    }
-
-    private fun createRecordFile() {
-        val file = getFileStreamPath("times")
-        if (file.exists()) {
-            FileInputStream(file).bufferedReader().useLines {
-                it.forEach { line ->
-                    val times = line.toIntOrNull()
-                    if (times == null) {
-                        return@useLines
-                    } else {
-                        viewModel.skippedTimes.postValue(times)
-                    }
-                    return@forEach
-                }
-            }
-        }
-
-        FileOutputStream(file).bufferedWriter()
-
     }
 
     private val statusObserver by lazy {
@@ -94,6 +71,15 @@ class MainActivity : AppCompatActivity() {
             isEnabled.observe(this@MainActivity, statusObserver)
             isRunning.observe(this@MainActivity, statusObserver)
             isAvailable.observe(this@MainActivity, statusObserver)
+            error.observe(this@MainActivity) {
+                val out = ByteArrayOutputStream()
+                it.printStackTrace(PrintStream(out))
+                out.close()
+                MaterialAlertDialogBuilder(this@MainActivity)
+                    .setTitle(R.string.error_occurred)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .setMessage(out.toString()).show()
+            }
             updateShizukuInstallationState()
             initSkippedTimes(getFileStreamPath("times"))
         }
@@ -120,7 +106,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun showTestPage(view: View) {
-        supportFragmentManager.beginTransaction().add(R.id.scroll_view, TestFragment()).addToBackStack("test").commit()
+      //  supportFragmentManager.beginTransaction().add(R.id.scroll_view, TestFragment()).addToBackStack("test").commit()
     }
 
     fun showMenu(view: View) {}
@@ -171,11 +157,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.unbindService(false)
+        viewModel.detachFromService()
     }
 
     fun testAvailability(view: View) {
-        viewModel.isAvailable.value = false
-        viewModel.isRunning.value = true
+       startActivity(Intent(this,TestActivity::class.java))
     }
 }

@@ -2,4 +2,5 @@
 <resources>
     <dimen name="corner_item">8dp</dimen>
     <dimen name="corner_btn">24dp</dimen>
+    <dimen name="corner_dialog">8dp</dimen>
 </resources>

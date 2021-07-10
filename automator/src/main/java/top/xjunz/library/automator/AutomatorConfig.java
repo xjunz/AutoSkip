@@ -10,7 +10,7 @@ public class AutomatorConfig implements Parcelable {
     boolean fallbackInjectingEvents = true;
     boolean checkRegion = true;
     boolean checkSize = true;
-    boolean checkDigit = true;
+    boolean checkDigit = false;
 
     @Override
     public int describeContents() {
