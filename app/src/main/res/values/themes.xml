@@ -13,5 +13,44 @@
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:letterSpacing">0.05</item>
         <item name="android:lineSpacingExtra">1dp</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Automator.MaterialAlertDialog
+        </item>
+    </style>
+
+    <style name="Theme.Automator.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+    <!--Material Alert Dialog Override-->
+    <style name="ThemeOverlay.Automator.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="alertDialogStyle">@style/MaterialAlertDialog.Automator.Shape</item>
+        <item name="android:windowAnimationStyle">@style/AlertDialogAnimation</item>
+        <item name="materialAlertDialogBodyTextStyle">
+            @style/MaterialAlertDialog.Automator.Body.Text
+        </item>
+    </style>
+    <!--Alert Dialog Style-->
+    <style name="MaterialAlertDialog.Automator.Shape" parent="MaterialAlertDialog.MaterialComponents">
+        <item name="shapeAppearance">@style/ShapeAppearance.Dialog</item>
+    </style>
+
+    <style name="BottomCardShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeTopRight">16dp</item>
+    </style>
+    <!--Alert Dialog Body Text Style-->
+    <style name="MaterialAlertDialog.Automator.Body.Text" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:lineSpacingExtra">1dp</item>
+    </style>
+    <!--Main Shape Appearance-->
+    <style name="ShapeAppearance.Dialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/corner_dialog</item>
+    </style>
+
+    <style name="AlertDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/mtrl_alert_dialog_enter</item>
+        <item name="android:windowExitAnimation">@anim/mtrl_alert_dialog_exit</item>
     </style>
 </resources>

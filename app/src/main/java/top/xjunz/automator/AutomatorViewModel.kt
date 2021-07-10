@@ -7,9 +7,8 @@ import android.content.pm.PackageManager
 import android.os.DeadObjectException
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
-import android.os.Process
-import android.system.Os
 import android.util.Log
+import android.view.accessibility.AccessibilityNodeInfo
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,10 +19,9 @@ import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
 import top.xjunz.library.automator.AutomatorConnection
 import top.xjunz.library.automator.IAutomatorConnection
+import top.xjunz.library.automator.OnSkipListener
 import java.io.File
-import java.io.FileDescriptor
 import java.io.FileInputStream
-import java.io.FileOutputStream
 
 
 /**
@@ -62,6 +60,8 @@ class AutomatorViewModel : ViewModel() {
             }
         }
     }
+
+    val error = MutableLiveData<Throwable>()
 
     val skippedTimes = MutableLiveData<Int>()
 
@@ -125,6 +125,7 @@ class AutomatorViewModel : ViewModel() {
                     }
                 }.destroy()
         }
+        isRunning.value = bound == true
         isBinding.value = false
     }
 
@@ -142,29 +143,46 @@ class AutomatorViewModel : ViewModel() {
             .processNameSuffix(serviceNameSuffix).debuggable(BuildConfig.DEBUG).version(BuildConfig.VERSION_CODE)
     }
 
+    private val deathRecipient by lazy {
+        IBinder.DeathRecipient {
+            Log.i(tag, "Service is dead!")
+            isRunning.postValue(false)
+        }
+    }
+    private var automatorService: IAutomatorConnection? = null
     private val userServiceConnection by lazy {
         object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
                 synchronized(lock) {
                     if (binder != null && binder.pingBinder()) {
-                        val automatorService = IAutomatorConnection.Stub.asInterface(binder)
+                        automatorService = IAutomatorConnection.Stub.asInterface(binder)
                         automatorService?.run {
                             try {
                                 Log.i(tag, sayHello())
-                                if (!isConnnected) {
+                                if (!isConnected) {
                                     connect()
+                                    setFileDescriptors(ParcelFileDescriptor.open(File(filePath!!),
+                                        ParcelFileDescriptor.MODE_READ_WRITE
+                                                or ParcelFileDescriptor.MODE_APPEND.inv()))
                                     Log.i(tag, "Automator connected successfully!")
                                 }
-                                setFileDescriptors(ParcelFileDescriptor.open(File(filePath!!),
-                                    ParcelFileDescriptor.MODE_READ_WRITE
-                                            or ParcelFileDescriptor.MODE_APPEND.inv()))
+                                binder.linkToDeath(deathRecipient, 0)
+                                setOnSkipListener(object : OnSkipListener.Stub() {
+                                    override fun onSkip(times: Int, type: Int, node: AccessibilityNodeInfo?) {
+                                        this@AutomatorViewModel.skippedTimes.postValue(times)
+                                        Log.i(tag, "skipped time: $times, type: $type, node: $node")
+                                    }
+                                })
+                                this@AutomatorViewModel.skippedTimes.value = skippedTimes
                                 servicePid = pid
                                 serviceStartTimestamp = startTimestamp
                                 isRunning.value = true
                             } catch (t: Throwable) {
                                 t.printStackTrace()
+                                error.value = t
                                 //This happens when our service is still running while the binder
-                                //is disconnected. Just kill what we could not control.
+                                //is disconnected or our service dead unexpectedly when starting.
+                                //Anyway, unbind the service and kill it.
                                 if (t is DeadObjectException) {
                                     if (!unbindService(true) && servicePid > 0) {
                                         killProcess(servicePid.toString())
@@ -180,7 +198,6 @@ class AutomatorViewModel : ViewModel() {
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 isRunning.value = false
-                updateShizukuInstallationState()
             }
         }
     }
@@ -196,6 +213,7 @@ class AutomatorViewModel : ViewModel() {
             lock.wait(6180)
         } catch (t: Throwable) {
             t.printStackTrace()
+            error.value = t
             return false
         }
         return isRunning.value == true
@@ -208,6 +226,7 @@ class AutomatorViewModel : ViewModel() {
         true
     } catch (t: Throwable) {
         t.printStackTrace()
+        error.value = t
         isBinding.value = false
         false
     }
@@ -218,6 +237,7 @@ class AutomatorViewModel : ViewModel() {
         true
     } catch (t: Throwable) {
         t.printStackTrace()
+        error.value = t
         false
     }
 
@@ -225,6 +245,9 @@ class AutomatorViewModel : ViewModel() {
         if (isRunning.value == true) {
             unbindService(true)
         } else {
+            //clear cache in the Shizuku connection pool first
+            // to avoid binding a cached but dead service
+            // unbindService(false)
             bindService()
         }
     }
@@ -232,22 +255,15 @@ class AutomatorViewModel : ViewModel() {
     @Suppress("BlockingMethodInNonBlockingContext")
     fun initSkippedTimes(file: File) = viewModelScope.launch {
         filePath = file.path
-        var times: Int? = null
+        var times = 0
         withContext(Dispatchers.IO) {
             if (file.exists()) {
                 FileInputStream(file).bufferedReader().useLines {
                     it.forEach { line ->
-                        times = line.toIntOrNull()
+                        times = line.toIntOrNull() ?: 0
                         return@useLines
                     }
                 }
-            }
-            if (times == null) {
-                FileOutputStream(file).bufferedWriter().use {
-                    it.write('0'.code)
-                    it.flush()
-                }
-                times = 0
             }
         }
         skippedTimes.value = times
@@ -263,6 +279,54 @@ class AutomatorViewModel : ViewModel() {
         }
         Shizuku.addBinderDeadListener {
             isAvailable.value = false
+            //binder is dead, there is no way to judge whether the service is still running
         }
+    }
+
+    private inline fun safeDo(block: () -> Unit): Boolean {
+        automatorService?.let {
+            it.asBinder().run {
+                if (pingBinder()) {
+                    block.invoke()
+                    return true
+                }
+            }
+        }
+    }
+
+    fun pauseService(): Boolean {
+        automatorService?.let {
+            it.asBinder().run {
+                if (pingBinder()) {
+                    it.pause()
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    fun stopTesting(): Boolean {
+        automatorService?.let {
+            it.asBinder().run {
+                if (pingBinder()) {
+                    it.stopTestMonitoring()
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    fun detachFromService() {
+        automatorService?.let {
+            it.asBinder().run {
+                if (pingBinder()) {
+                    unlinkToDeath(deathRecipient, 0)
+                    it.removeOnSkipListener()
+                }
+            }
+        }
+        unbindService(false)
     }
 }

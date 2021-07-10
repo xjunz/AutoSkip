@@ -3,13 +3,19 @@ package top.xjunz.automator
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
 
 /**
  * @author xjunz 2021/6/25
  */
 val config by lazy { AutomatorApp.Config() }
 
-class AutomatorApp : Application() {
+class AutomatorApp : Application(), ViewModelStoreOwner {
+    private val appViewModelStore by lazy {
+        ViewModelStore()
+    }
+
     companion object {
         lateinit var appContext: Context
         private lateinit var sharedPreferences: SharedPreferences
@@ -35,4 +41,6 @@ class AutomatorApp : Application() {
         sharedPreferences =
             applicationContext.getSharedPreferences(SP_CONFIG_NAME, Context.MODE_PRIVATE)
     }
+
+    override fun getViewModelStore() = appViewModelStore
 }
