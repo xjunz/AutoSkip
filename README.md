@@ -10,12 +10,9 @@
 
 - 不需要您手动开启辅助功能
 - 支持开机自启
-
 - 不需要在通知栏显示通知以保持后台运行
-
 - 不需要刻意保活便可常驻后台
 - 省电且占用系统资源较少
-
 - 代码开源，安全可信
 
 ## 实现
@@ -30,4 +27,9 @@
 const val ALIPAY_DONATE_URL ="xxxx"
 const val EMAIL_ADDRESS = "xxxx"
 ```
+
+## 其他
+
+> 本应用基于Apache License 2.0开源，请在开源协议约束范围内使用源代码 | *Copyright 2021 XJUNZ*
+>
 
