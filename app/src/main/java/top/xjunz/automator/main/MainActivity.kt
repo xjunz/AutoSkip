@@ -53,6 +53,13 @@ class MainActivity : AppCompatActivity() {
         initViews()
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent?.data?.host == "about") {
+            AboutFragment().show(supportFragmentManager, "about")
+        }
+    }
+
     private val statusObserver by lazy {
         Observer<Boolean> {
             viewModel.run {
