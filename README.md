@@ -17,19 +17,31 @@
 
 ## 实现
 
-利用Shizuku授予特权，使用安卓内置的 [UiAutomation](https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/app/UiAutomation.java) 框架用于目标识别和模拟点击。详见 [AutomatorConnection.kt](https://github.com/xjunz/AutoSkip/blob/master/automator/src/main/java/top/xjunz/automator/AutomatorConnection.kt)。
+利用Shizuku授予特权，使用安卓内置的 [UiAutomation](https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/app/UiAutomation.java)
+框架用于目标识别和模拟点击。详见 [AutomatorConnection.kt](https://github.com/xjunz/AutoSkip/blob/master/automator/src/main/java/top/xjunz/automator/AutomatorConnection.kt)。
 
 ## 构建
 
-如果你想构建此项目，请将代码`git clone`到本地后，手动建立`top.xjunz.automator.Constants.kt`类，并在其中定义:
+如果你想构建此项目，请将代码`git clone`到本地后
+
+- 手动建立`top.xjunz.automator.Constants.kt`类，并在其中定义:
 
 ```kotlin
 const val ALIPAY_DONATE_URL ="xxxx"
 const val EMAIL_ADDRESS = "xxxx"
 ```
 
-## 其他
+- 在项目根目录下建立`sign.properties`，在其中配置自定义签名信息:
 
-> 本应用基于Apache License 2.0开源，请在开源协议约束范围内使用源代码 | *Copyright 2021 XJUNZ*
+```properties
+keystore.file=xxx
+keystore.password=xxx
+keystore.alias=xxx
+keystore.keyPassword=xxx
+```
+
+## License
+
+> 本应用基于[Apache-2.0 License](https://github.com/xjunz/AutoSkip/blob/master/LICENSE)开源，请在开源协议约束范围内使用源代码 | *Copyright 2021 XJUNZ*
 >
 
