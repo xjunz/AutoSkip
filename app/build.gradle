@@ -26,6 +26,9 @@ int incrementRefine() {
 
 def refine = incrementRefine()
 android {
+    signingConfigs {
+        sign
+    }
     compileSdkVersion 30
 
     defaultConfig {
@@ -45,6 +48,7 @@ android {
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.sign
         }
         debug {
             debuggable true
@@ -82,3 +86,4 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }
+apply from: rootProject.file("sign.gradle")
