@@ -3,13 +3,13 @@
     <string name="skip_in_seconds">跳过 %s 秒</string>
     <string name="activate_via_shizuku">使用<b> Shizuku </b>激活</string>
     <string name="intro_to_shizuku">本服务需要Shizuku的授权才能正常使用。Shizuku是一个健壮且可信的开源项目，
-        你可以在<a href='https://github.com/RikkaApps/Shizuku'>这里</a>找到源代码和更多详细信息。</string>
+        你可以在<a href='https://github.com/RikkaApps/Shizuku'>这里</a>查看源代码和更多详细信息。</string>
     <string name="more_to_say">本应用专注于帮助您跳过应用的启动广告/宣传页。\n\n
-        相比于其他同类产品，本应用有以下优点：\n\n
+        相比于其他同类产应用，本应用有以下优点：\n\n
         • 不需要您手动开启辅助功能\n
         • 支持开机自启\n
         • 不需要在通知栏显示通知以保持后台运行\n
-        • 您完全不必刻意地“保活”此应用\n
+        • 无需保活，后台常驻\n
         • 省电且占用系统资源少\n\n除此之外，本应用是<a href='automator://about'>开源</a>应用，您不必担心此应用在后台“做坏事”。
     </string>
     <string name="more">更多</string>
@@ -31,7 +31,6 @@
     <string name="pls_start_service">请先启动服务</string>
     <string name="hint_start_service">点击右侧按钮启动服务</string>
     <string name="pls_activate_service">请先在下方激活服务</string>
-    <string name="uncontrollable_service">服务仍在运行，但已失去连接</string>
     <string name="service_connecting">正在启动服务…</string>
     <string name="launch_shizuku_client">打开Shizuku</string>
     <string name="pls_grant_manually">请手动为此应用授权</string>
@@ -62,7 +61,6 @@
     <string name="height">高度</string>
     <string name="width">宽度</string>
     <string name="auto_started_for_u">已为您开机自启</string>
-    <string name="soft_reboot">软重启</string>
     <string name="auto_starting_for_u">正在为您开机自启…</string>
     <string name="ascending">升序</string>
     <string name="app_label">应用名称</string>
@@ -77,7 +75,7 @@
     <string name="update">下载最新版</string>
     <string name="mail_subject">「自动跳过」反馈 %s</string>
     <string name="mail_body">%s\n问题描述:\n</string>
-    <string name="license">此应用以Apache License 2.0协议<a href='https://github.com/xjunz/Automator'>开源</a>。
+    <string name="license">此应用以Apache-2.0 License协议<a href='https://github.com/xjunz/AutoSkip'>开源</a>。
         如果您喜欢此应用，可以点击下方「捐赠」按钮以支持我的工作。</string>
     <string name="cr">Copyright © XJUNZ 2021</string>
 </resources>

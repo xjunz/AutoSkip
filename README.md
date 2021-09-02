@@ -27,8 +27,8 @@
 - 手动建立`top.xjunz.automator.Constants.kt`类，并在其中定义:
 
 ```kotlin
-const val ALIPAY_DONATE_URL ="xxxx"
-const val EMAIL_ADDRESS = "xxxx"
+const val ALIPAY_DONATE_URL ="xxx"
+const val EMAIL_ADDRESS = "xxx"
 ```
 
 - 在项目根目录下建立`sign.properties`，在其中配置自定义签名信息:
