@@ -1,6 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="false" project-jdk-name="Android API 30 Platform" project-jdk-type="Android SDK">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_chip.xml" value="0.25729166666666664" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_circle.xml" value="0.25729166666666664" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_corcle.xml" value="0.25729166666666664" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_count_bubble.xml" value="0.25729166666666664" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_dialog.xml" value="0.25729166666666664" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_dummy_target.xml" value="0.22870370370370371" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_frame.xml" value="0.22870370370370371" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_frame_closeup_bottom.xml" value="0.22870370370370371" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_frame_closeup_top.xml" value="0.22870370370370371" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_framed_chip.xml" value="0.22870370370370371" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_option_frame.xml" value="0.25729166666666664" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_skip.xml" value="0.25729166666666664" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/bg_tinted_chip.xml" value="0.22870370370370371" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/ic_baseline_feedback_black_24dp.xml" value="0.22870370370370371" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/ic_baseline_my_location_24.xml" value="0.22870370370370371" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/ic_launcher_background.xml" value="0.22870370370370371" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.22870370370370371" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/layout/activity_main.xml" value="0.24114583333333334" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/layout/activity_stats.xml" value="0.24114583333333334" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/layout/activity_test.xml" value="0.24114583333333334" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/layout/fragment_about.xml" value="0.264" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/layout/fragment_detail.xml" value="0.24114583333333334" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/layout/fragment_stats.xml" value="0.24114583333333334" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/layout/item_record.xml" value="0.24114583333333334" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/menu/main.xml" value="0.24114583333333334" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/menu/stats.xml" value="0.21435185185185185" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.25729166666666664" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.22870370370370371" />
+        <entry key="..\:/MyProjects/Automator/app/src/main/res/xml/file_paths.xml" value="0.24114583333333334" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="Android API 30 Platform" project-jdk-type="Android SDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

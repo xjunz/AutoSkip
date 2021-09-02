@@ -1,15 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
 
-    <top.xjunz.automator.TestLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <data>
+
+        <variable
+            name="host"
+            type="top.xjunz.automator.test.TestActivity" />
+    </data>
+
+    <top.xjunz.automator.test.TestLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/test_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?colorAccent"
+        android:background="?colorTestBackground"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/skip"
+            android:id="@+id/tv_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:text="@string/hint_drag_target"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+            android:textColor="?android:textColorSecondary"
+            android:translationY="-32dp" />
+
+        <TextView
+            android:id="@+id/skip_target"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top|end"
@@ -17,25 +37,16 @@
             android:layout_marginEnd="32dp"
             android:background="@drawable/bg_skip"
             android:gravity="center"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="4dp"
-            android:text="跳过"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="@dimen/spacing_unit"
+            android:text="@string/skip"
             android:textColor="@android:color/white" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="拖动可移动位置"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-            android:textColor="?android:textColorSecondary" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/bottom_panel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            app:cardBackgroundColor="?colorSurface"
             app:cardElevation="4dp"
             app:shapeAppearance="@style/BottomCardShape">
 
@@ -50,87 +61,62 @@
                     android:layout_width="64dp"
                     android:layout_height="6dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/spacing_unit"
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/bg_handler" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:text="@string/width"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+
+                <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/sb_width"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="@dimen/spacing_unit"
+                    android:max="100"
+                    android:onProgressChanged="@{(v,p,f)->testLayout.adjustTargetWidth((float)p/v.max)}" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="宽度"
+                    android:text="@string/height"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
 
                 <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/sb_height"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginVertical="8dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="高度"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
-
-                <androidx.appcompat.widget.AppCompatSeekBar
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:drawablePadding="4dp"
-                    android:text="直接可点击"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                    android:textColor="?android:textColorSecondary" />
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:drawablePadding="4dp"
-                    android:text="显示数字倒计时"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                    android:textColor="?android:textColorSecondary" />
-
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:max="100"
+                    android:onProgressChanged="@{(v,p,f)->testLayout.adjustTargetHeight((float)p/v.max)}" />
             </androidx.appcompat.widget.LinearLayoutCompat>
 
 
         </com.google.android.material.card.MaterialCardView>
 
-        <androidx.appcompat.widget.LinearLayoutCompat
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/bottom_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_marginTop="8dp"
-            android:background="?colorSurface"
-            android:elevation="4dp"
+            android:layout_marginTop="@dimen/spacing_unit"
             android:orientation="horizontal"
-            android:paddingHorizontal="16dp">
-
-            <com.google.android.material.button.MaterialButton
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:text="恢复默认"
-                android:textColor="?android:textColorSecondary"
-                app:cornerRadius="@dimen/corner_btn" />
+            app:cardElevation="4dp">
 
 
             <com.google.android.material.button.MaterialButton
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:onClick="startTesting"
-                android:text="测试"
+                android:layout_marginHorizontal="8dp"
+                android:onClick="test"
+                android:text="@string/test"
                 app:cornerRadius="@dimen/corner_btn" />
 
-        </androidx.appcompat.widget.LinearLayoutCompat>
-    </top.xjunz.automator.TestLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </top.xjunz.automator.test.TestLayout>
 </layout>

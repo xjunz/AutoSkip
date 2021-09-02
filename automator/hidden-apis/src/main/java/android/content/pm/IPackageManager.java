@@ -1,6 +1,5 @@
 package android.content.pm;
 
-import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.os.Binder;
 import android.os.IBinder;
@@ -13,6 +12,12 @@ import java.util.List;
  */
 public interface IPackageManager extends IInterface {
     ComponentName getHomeActivities(List<ResolveInfo> outHomeCandidates);
+
+    /**
+     * As per {@link android.content.pm.PackageManager#setComponentEnabledSetting}.
+     */
+    void setComponentEnabledSetting(ComponentName componentName,
+                                    int newState, int flags, int userId);
 
     abstract class Stub extends Binder implements IPackageManager {
 

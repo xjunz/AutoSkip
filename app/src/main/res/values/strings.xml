@@ -7,6 +7,7 @@
     <string name="more_to_say">本应用专注于帮助您跳过应用的启动广告/宣传页。\n\n
         相比于其他同类产品，本应用有以下优点：\n\n
         • 不需要您手动开启辅助功能\n
+        • 支持开机自启\n
         • 不需要在通知栏显示通知以保持后台运行\n
         • 您完全不必刻意地“保活”此应用\n
         • 省电且占用系统资源少\n\n除此之外，本应用是<a href='https://github.com/xjunz/Automator'>开源</a>应用，您不必担心此应用在后台“做坏事”。
@@ -18,7 +19,7 @@
     <string name="about">关于</string>
     <string name="settings">设置</string>
     <string name="statistics">统计数据</string>
-    <string name="format_total_count">累计已跳过 %s 次</string>
+    <string name="format_total_count">累计已跳过 %d 次</string>
     <string name="caption_test">测试服务是否激活并且能否正常使用</string>
     <string name="usability_test">可用性测试</string>
     <string name="install_shizuku">安装Shizuku</string>
@@ -27,11 +28,56 @@
     <string name="enter">进入</string>
     <string name="run_spaced">运行&#160;&#160;</string>
     <string name="service_not_started">服务未启动</string>
-    <string name="pls_start_service">点击右侧按钮启动服务</string>
+    <string name="pls_start_service">请先启动服务</string>
+    <string name="hint_start_service">点击右侧按钮启动服务</string>
     <string name="pls_activate_service">请先在下方激活服务</string>
     <string name="uncontrollable_service">服务仍在运行，但已失去连接</string>
     <string name="service_connecting">正在启动服务…</string>
     <string name="launch_shizuku_client">打开Shizuku</string>
     <string name="pls_grant_manually">请手动为此应用授权</string>
     <string name="error_occurred">发生错误</string>
+    <string name="dump_log">导出日志</string>
+    <string name="dump_log_failed">导出日志失败</string>
+    <string name="skip">跳过</string>
+    <string name="hint_drag_target">拖动「跳过」按钮可移动其位置</string>
+    <string name="test_ok">测试成功</string>
+    <string name="test_not_ok">测试失败</string>
+    <string name="illegal_location">非法位置</string>
+    <string name="illegal_size">非法大小</string>
+    <string name="error">错误</string>
+    <string name="unknown_problem">未知问题</string>
+    <string name="icon">图标</string>
+    <string name="format_count">%d次</string>
+    <string name="format_count_per_day">平均 %.1f 次每天</string>
+    <string name="format_duration">共%d天%d时%d分</string>
+    <string name="format_first_time">首次: %s</string>
+    <string name="format_latest_time">最近: %s</string>
+    <string name="records">记录</string>
+    <string name="unknown_app">未知应用</string>
+    <string name="location_demonstration">位置演示</string>
+    <string name="auto_start_after_boot">开机自启</string>
+    <string name="caption_auto_start">开启Shizuku</string>
+    <string name="pls_turn_on_shizuku_auto_start">请先启用Shizuku的「开机启动」功能</string>
+    <string name="test">测试</string>
+    <string name="height">高度</string>
+    <string name="width">宽度</string>
+    <string name="auto_started_for_u">已为您开机自启</string>
+    <string name="soft_reboot">软重启</string>
+    <string name="auto_starting_for_u">正在为您开机自启…</string>
+    <string name="ascending">升序</string>
+    <string name="app_label">应用名称</string>
+    <string name="first_timestamp">首次跳过时间</string>
+    <string name="latest_timestamp">最近跳过时间</string>
+    <string name="ave_skipping_count_per_day">每日跳过次数</string>
+    <string name="total_skipping_count">总跳过次数</string>
+    <string name="sort_by">排序方式</string>
+    <string name="feedback">反馈</string>
+    <string name="donate">捐赠</string>
+    <string name="source_code">源代码</string>
+    <string name="update">下载最新版</string>
+    <string name="mail_subject">「自动跳过」反馈 %s</string>
+    <string name="mail_body">%s\n问题描述:\n</string>
+    <string name="license">此应用以Apache License 2.0协议<a href='https://github.com/xjunz/Automator'>开源</a>。
+        如果您喜欢此应用，可以点击下方「捐赠」按钮以支持我的工作。</string>
+    <string name="cr">Copyright © XJUNZ 2021</string>
 </resources>

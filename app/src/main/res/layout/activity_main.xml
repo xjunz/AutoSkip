@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--suppress AndroidUnknownAttribute -->
-<layout xmlns:tools="http://schemas.android.com/tools">
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -7,11 +8,10 @@
 
         <variable
             name="vm"
-            type="top.xjunz.automator.AutomatorViewModel" />
+            type="top.xjunz.automator.app.AutomatorViewModel" />
     </data>
 
     <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:ignore="ContentDescription">
@@ -20,7 +20,7 @@
             android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
+            android:layout_marginHorizontal="@dimen/spacing_unit"
             android:alpha=".9"
             android:clickable="true"
             tools:ignore="KeyboardInaccessibleWidget">
@@ -36,6 +36,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
             <ImageButton
+                android:id="@+id/ib_menu"
                 tooltip="@{@string/more}"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -51,7 +52,7 @@
             android:id="@+id/scroll_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/spacing_unit"
             android:clipToPadding="false"
             android:paddingTop="?actionBarSize">
 
@@ -59,7 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:paddingHorizontal="8dp">
+                android:paddingHorizontal="@dimen/spacing_unit">
 
 
                 <RelativeLayout
@@ -83,7 +84,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_service_status"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/spacing_unit"
                         android:text="@string/pls_activate_service"
                         android:typeface="monospace" />
 
@@ -95,7 +96,6 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:activated="@{vm.isRunning()}"
-                        android:enabled="@{vm.isEnabled()&amp;&amp;!vm.isBinding()}"
                         android:onClick="@{()->vm.toggleService()}"
                         android:stateListAnimator="@null"
                         android:text="@{vm.isRunning()?@string/stop_spaced:@string/run_spaced}"
@@ -113,7 +113,7 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/spacing_unit"
                     android:background="@drawable/bg_option_frame"
                     android:padding="16dp">
 
@@ -131,7 +131,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_activate_via_shizuku"
                         android:layout_alignParentEnd="true"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/spacing_unit"
                         android:letterSpacing=".05"
                         android:lineSpacingExtra="1dp"
                         android:movementMethod="@{LinkMovementMethod.getInstance()}"
@@ -148,7 +148,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_intro_to_shizuku"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/spacing_unit"
                         android:gravity="center_vertical">
 
 
@@ -156,13 +156,13 @@
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
+                            android:layout_marginEnd="@dimen/spacing_unit"
                             android:layout_toEndOf="@id/center"
                             android:layout_weight="0"
-                            android:enabled="@{vm.isAvailable()&amp;&amp;!vm.isEnabled()}"
+                            android:enabled="@{vm.isUsable()&amp;&amp;vm.isAvailable()&amp;&amp;!vm.isGranted()}"
                             android:onClick="requestPermission"
                             android:stateListAnimator="@null"
-                            android:text="@{vm.isEnabled()?@string/activated_spaced:@string/activate_spaced}"
+                            android:text="@{vm.isGranted()?@string/activated_spaced:@string/activate_spaced}"
                             android:textColor="@color/color_status_text"
                             app:cornerRadius="@dimen/corner_btn"
                             app:icon="@drawable/ic_baseline_bolt_24"
@@ -175,12 +175,12 @@
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="@dimen/spacing_unit"
                             android:layout_weight="1"
-                            android:activated="@{vm.isInstalled()}"
+                            android:activated="@{vm.isUsable()}"
                             android:onClick="performShizukuAction"
                             android:stateListAnimator="@null"
-                            android:text="@{vm.isInstalled()?@string/launch_shizuku_client:@string/install_shizuku}"
+                            android:text="@{vm.isUsable()?@string/launch_shizuku_client:@string/install_shizuku}"
                             app:cornerRadius="@dimen/corner_btn"
                             app:icon="@drawable/ic_shizuku_action"
                             app:iconGravity="textStart"
@@ -192,7 +192,7 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/spacing_unit"
                     android:background="@drawable/bg_option_frame"
                     android:clickable="true"
                     android:focusable="true"
@@ -201,13 +201,10 @@
 
                     <ImageView
                         android:id="@+id/iv_test"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        style="@style/TintedIcon.Main"
                         android:layout_centerVertical="true"
-                        android:background="@drawable/bg_circle"
                         android:scaleType="centerInside"
-                        android:src="@drawable/ic_baseline_bug_report_24"
-                        app:tint="?colorPrimaryVariant" />
+                        android:src="@drawable/ic_baseline_bug_report_24" />
 
                     <TextView
                         android:id="@+id/tv_test"
@@ -224,7 +221,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_test"
                         android:layout_marginStart="16dp"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/spacing_unit"
                         android:layout_toEndOf="@id/iv_test"
                         android:text="@string/caption_test" />
                 </RelativeLayout>
@@ -232,21 +229,18 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/spacing_unit"
                     android:background="@drawable/bg_option_frame"
                     android:clickable="true"
                     android:focusable="true"
+                    android:onClick="showRecords"
                     android:padding="16dp">
 
                     <ImageView
                         android:id="@+id/iv_stats"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        style="@style/TintedIcon.Main"
                         android:layout_centerVertical="true"
-                        android:background="@drawable/bg_circle"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_baseline_history_24"
-                        app:tint="?colorPrimaryVariant" />
+                        android:src="@drawable/ic_baseline_history_24" />
 
                     <TextView
                         android:id="@+id/tv_stats"
@@ -264,11 +258,12 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_stats"
                         android:layout_marginStart="16dp"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/spacing_unit"
                         android:layout_toEndOf="@id/iv_stats"
-                        android:text="@{@string/format_total_count(vm.skippedTimes)}" />
+                        android:text="@{@string/format_total_count(vm.skippingTimes)}" />
 
                     <ImageView
+                        visible="@{vm.skippingTimes>0}"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_alignParentEnd="true"
@@ -280,21 +275,19 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/spacing_unit"
                     android:background="@drawable/bg_option_frame"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    android:visibility="gone">
 
                     <ImageView
                         android:id="@+id/iv_config"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        style="@style/TintedIcon.Main"
                         android:layout_centerVertical="true"
                         android:background="@drawable/bg_circle"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_baseline_settings_24"
-                        app:tint="?colorPrimaryVariant" />
+                        android:src="@drawable/ic_baseline_settings_24" />
 
                     <TextView
                         android:id="@+id/tv_config"
@@ -319,20 +312,16 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/spacing_unit"
                     android:background="@drawable/bg_option_frame"
                     android:padding="16dp">
 
                     <ImageView
                         android:id="@+id/iv_more"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        style="@style/TintedIcon.Main"
                         android:layout_alignTop="@id/tv_more"
                         android:layout_marginTop="4dp"
-                        android:background="@drawable/bg_circle"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_baseline_more_horiz_24"
-                        app:tint="?colorPrimaryVariant" />
+                        android:src="@drawable/ic_baseline_more_horiz_24" />
 
                     <TextView
                         android:id="@+id/tv_more"
@@ -349,7 +338,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_more"
                         android:layout_marginStart="16dp"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/spacing_unit"
                         android:layout_toEndOf="@id/iv_more"
                         android:movementMethod="@{LinkMovementMethod.getInstance()}"
                         android:text="@string/more_to_say" />

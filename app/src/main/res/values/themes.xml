@@ -1,6 +1,6 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.Automator" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+<resources>
+
+    <style name="Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryVariant">@color/primaryDarkColor</item>
@@ -9,15 +9,25 @@
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
         <item name="colorOnSecondary">@color/secondaryTextColor</item>
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:letterSpacing">0.05</item>
         <item name="android:lineSpacingExtra">1dp</item>
+        <item name="colorTopBarTint">?colorPrimary</item>
+        <item name="colorTestBackground">?colorSecondary</item>
+    </style>
+    <!-- Base application theme. -->
+    <style name="Base.Automator">
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.Automator.MaterialAlertDialog
+        </item>
+        <item name="popupMenuStyle">@style/Widget.MaterialComponents.PopupMenu.Overflow
         </item>
     </style>
 
-    <style name="Theme.Automator.Fullscreen">
+    <style name="Base.Automator.Translucent">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+
+    <style name="Base.Automator.Fullscreen">
         <item name="android:windowFullscreen">true</item>
     </style>
     <!--Material Alert Dialog Override-->
@@ -28,9 +38,30 @@
             @style/MaterialAlertDialog.Automator.Body.Text
         </item>
     </style>
+
+    <style name="Detail" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="android:windowAnimationStyle">@style/AlertDialogAnimation</item>
+        <item name="android:windowMinWidthMajor">80%</item>
+        <item name="android:windowMinWidthMinor">70%</item>
+    </style>
     <!--Alert Dialog Style-->
     <style name="MaterialAlertDialog.Automator.Shape" parent="MaterialAlertDialog.MaterialComponents">
         <item name="shapeAppearance">@style/ShapeAppearance.Dialog</item>
+    </style>
+
+    <style name="Base.Dialog">
+        <item name="android:windowMinWidthMinor">85%</item>
+        <item name="android:windowMinWidthMajor">60%</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowAnimationStyle">@style/AlertDialogAnimation</item>
+        <item name="android:backgroundDimAmount">.3</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowElevation">10dp</item>
+        <item name="android:windowBackground">@drawable/bg_dialog</item>
     </style>
 
     <style name="BottomCardShape">
