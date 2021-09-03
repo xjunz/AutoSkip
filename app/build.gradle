@@ -36,11 +36,12 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0.0"
-
+        versionName "1.0.0"+ ".r" + refine
+        if(gradle.startParameter.taskNames.any{it.toLowerCase().contains("debug")}){
+            versionName+="-debug"
+        }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "int", "REFINE", refine.toString()
-        buildConfigField "String", "VERSION_NAME", "\"" + versionName + ".r" + refine + "\""
     }
 
     buildTypes {
@@ -52,7 +53,6 @@ android {
         }
         debug {
             debuggable true
-            buildConfigField "String", "VERSION_NAME", "\"" + android.defaultConfig.versionName + ".r" + refine + "-debug\""
         }
     }
     buildFeatures {
