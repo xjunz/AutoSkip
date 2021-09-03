@@ -1,3 +1,7 @@
+---
+typora-root-url: ./
+---
+
 # AutoSkip
 
 一款基于[Shizuku](https://github.com/RikkaApps/Shizuku)授权**自动跳过**工具
@@ -14,6 +18,11 @@
 - 不需要刻意保活便可常驻后台
 - 省电且占用系统资源较少
 - 代码开源，安全可信
+
+## 截图
+
+| <img src="/app/screenshots/pic_main.webp" alt="pic_main" style="zoom:25%;" /> | <img src="/app/screenshots/pic_test.webp" alt="pic_test" style="zoom:25%;" /> | <img src="/app/screenshots/pic_records.webp" style="zoom:25%;" /> | <img src="/app/screenshots/pic_night_mode.webp" style="zoom:25%;" /> |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 
 ## 实现
 
@@ -42,6 +51,6 @@ keystore.keyPassword=xxx
 
 ## License
 
-> 本应用基于[Apache-2.0 License](https://github.com/xjunz/AutoSkip/blob/master/LICENSE)开源，请在开源协议约束范围内使用源代码 | *Copyright 2021 XJUNZ*
+> 本应用基于[Apache-2.0 License](https://github.com/xjunz/AutoSkip/blob/master/LICENSE)开源，请在开源协议约束范围内使用源代码 | **Copyright 2021 XJUNZ**
 >
 
