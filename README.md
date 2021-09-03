@@ -15,6 +15,11 @@
 - 省电且占用系统资源较少
 - 代码开源，安全可信
 
+## 截图
+
+| <img src="/app/screenshots/pic_main.webp" alt="pic_main" style="zoom:25%;" /> | <img src="/app/screenshots/pic_test.webp" alt="pic_test" style="zoom:25%;" /> | <img src="/app/screenshots/pic_records.webp" style="zoom:25%;" /> | <img src="/app/screenshots/pic_night_mode.webp" style="zoom:25%;" /> |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+
 ## 实现
 
 利用Shizuku授予特权，使用安卓内置的 [UiAutomation](https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/app/UiAutomation.java)
@@ -42,6 +47,6 @@ keystore.keyPassword=xxx
 
 ## License
 
-> 本应用基于[Apache-2.0 License](https://github.com/xjunz/AutoSkip/blob/master/LICENSE)开源，请在开源协议约束范围内使用源代码 | *Copyright 2021 XJUNZ*
+> 本应用基于[Apache-2.0 License](https://github.com/xjunz/AutoSkip/blob/master/LICENSE)开源，请在开源协议约束范围内使用源代码 | **Copyright 2021 XJUNZ**
 >
 
