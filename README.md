@@ -1,3 +1,7 @@
+---
+typora-root-url: ./
+---
+
 # AutoSkip
 
 一款基于[Shizuku](https://github.com/RikkaApps/Shizuku)授权**自动跳过**工具
