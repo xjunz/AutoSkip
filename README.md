@@ -1,6 +1,3 @@
----
-typora-root-url: ./
----
 
 # AutoSkip
 
@@ -31,13 +28,14 @@ typora-root-url: ./
 
 ## 构建
 
-如果你想构建此项目，请将代码`git clone`到本地后
+如果你想构建此项目，请将代码`git clone`到本地后，在**Android Studio**打开，并
 
 - 手动建立`top.xjunz.automator.Constants.kt`类，并在其中定义:
 
 ```kotlin
 const val ALIPAY_DONATE_URL ="xxx"
 const val EMAIL_ADDRESS = "xxx"
+const val APP_DOWNLOAD_URL = "xxx"
 ```
 
 - 在项目根目录下建立`sign.properties`，在其中配置自定义签名信息:

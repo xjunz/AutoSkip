@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import me.zhanghai.android.appiconloader.AppIconLoader
+import top.xjunz.automator.APP_DOWNLOAD_URL
 import top.xjunz.automator.BuildConfig
 import top.xjunz.automator.R
 import top.xjunz.automator.databinding.FragmentAboutBinding
@@ -46,7 +47,7 @@ class AboutFragment : DialogFragment() {
             donate(requireActivity())
         }
         binding.btnUpdate.setOnClickListener {
-            viewUrl(requireActivity(), "https://")
+            viewUrl(requireActivity(), APP_DOWNLOAD_URL)
         }
     }
 
