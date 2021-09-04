@@ -321,7 +321,9 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
 
 
     fun updateGranted() {
-        isGranted.value = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+        if (Shizuku.pingBinder()) {
+            isGranted.value = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+        }
     }
 
     fun detachFromService() {

@@ -86,6 +86,10 @@ class MainActivity : AppCompatActivity() {
                 when (it.itemId) {
                     R.id.item_dump_log -> {
                         viewModel.dumpLog()
+                        if (!getFileStreamPath(LOG_FILE_NAME).exists()) {
+                            toast(getString(R.string.no_log))
+                            return@setOnMenuItemClickListener true
+                        }
                         val uri = FileProvider.getUriForFile(
                             this@MainActivity,
                             "top.xjunz.automator.provider.file", logFile
@@ -115,8 +119,12 @@ class MainActivity : AppCompatActivity() {
                     }
                     R.id.item_feedback -> {
                         viewModel.dumpLog()
-                        val uri = FileProvider.getUriForFile(this@MainActivity, "top.xjunz.automator.provider.file", logFile)
-                        sendMailTo(this@MainActivity, uri)
+                        if (getFileStreamPath(LOG_FILE_NAME).exists()) {
+                            val uri = FileProvider.getUriForFile(this@MainActivity, "top.xjunz.automator.provider.file", logFile)
+                            sendMailTo(this@MainActivity, uri)
+                        } else {
+                            sendMailTo(this@MainActivity, null)
+                        }
                     }
                     R.id.item_about -> AboutFragment().show(supportFragmentManager, "about")
                 }

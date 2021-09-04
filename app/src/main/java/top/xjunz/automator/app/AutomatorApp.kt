@@ -28,7 +28,6 @@ class AutomatorApp : Application(), ViewModelStoreOwner {
         fun getBasicEnvInfo(): String {
             val sb = StringBuilder()
             sb.append("========Basic Env Info========")
-                .append("\nSHIZUKU_VERSION: ${Shizuku.getVersion()}")
                 .append("\nSDK_INT: ${Build.VERSION.SDK_INT}")
                 .append("\nSDK_RELEASE: ${Build.VERSION.RELEASE}")
                 .append("\nBRAND: ${Build.BRAND}")
@@ -37,6 +36,9 @@ class AutomatorApp : Application(), ViewModelStoreOwner {
                 .append("\nVERSION_NAME: ${BuildConfig.VERSION_NAME}")
                 .append("\nRESOLUTION: ${metrics.widthPixels}x${metrics.heightPixels}")
                 .append("\nDENSITY: ${metrics.density}")
+            if (Shizuku.pingBinder()) {
+                sb.append("SHIZUKU_VERSION: ${Shizuku.getVersion()}")
+            }
             return sb.toString()
         }
 

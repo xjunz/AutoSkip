@@ -24,16 +24,18 @@ fun donate(context: Activity) {
     viewUrl(context, ALIPAY_DONATE_URL)
 }
 
-fun sendMailTo(context: Activity, log: Uri) {
+fun sendMailTo(context: Activity, log: Uri?) {
     val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))
-        .putExtra(Intent.EXTRA_STREAM, log)
         .putExtra(Intent.EXTRA_SUBJECT, AutomatorApp.me.getString(R.string.mail_subject, formatCurrentTime()))
         .putExtra(Intent.EXTRA_TEXT, AutomatorApp.me.getString(R.string.mail_body, AutomatorApp.getBasicEnvInfo()))
         .putExtra(Intent.EXTRA_EMAIL, arrayOf(EMAIL_ADDRESS))
-    val resInfoList: List<ResolveInfo> = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-    for (resolveInfo in resInfoList) {
-        val packageName = resolveInfo.activityInfo.packageName
-        context.grantUriPermission(packageName, log, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    if (log != null) {
+        intent.putExtra(Intent.EXTRA_STREAM, log)
+        val resInfoList: List<ResolveInfo> = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        for (resolveInfo in resInfoList) {
+            val packageName = resolveInfo.activityInfo.packageName
+            context.grantUriPermission(packageName, log, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
     }
     context.startActivity(Intent.createChooser(intent, null))
 }

@@ -64,10 +64,14 @@ fun isShizukuAutoStartEnabled(): Boolean {
 }
 
 private fun isComponentEnabled(componentName: ComponentName): Boolean {
-    return when (packageManager.getComponentEnabledSetting(componentName)) {
-        PackageManager.COMPONENT_ENABLED_STATE_DISABLED -> false
-        PackageManager.COMPONENT_ENABLED_STATE_ENABLED -> true
-        PackageManager.COMPONENT_ENABLED_STATE_DEFAULT -> false
-        else -> false
+    return try {
+        when (packageManager.getComponentEnabledSetting(componentName)) {
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED -> false
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED -> true
+            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT -> false
+            else -> false
+        }
+    } catch (t: Throwable) {
+        false
     }
 }

@@ -96,6 +96,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:activated="@{vm.isRunning()}"
+                        android:enabled="false"
                         android:onClick="@{()->vm.toggleService()}"
                         android:stateListAnimator="@null"
                         android:text="@{vm.isRunning()?@string/stop_spaced:@string/run_spaced}"
