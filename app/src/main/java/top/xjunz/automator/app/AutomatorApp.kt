@@ -37,7 +37,7 @@ class AutomatorApp : Application(), ViewModelStoreOwner {
                 .append("\nRESOLUTION: ${metrics.widthPixels}x${metrics.heightPixels}")
                 .append("\nDENSITY: ${metrics.density}")
             if (Shizuku.pingBinder()) {
-                sb.append("SHIZUKU_VERSION: ${Shizuku.getVersion()}")
+                sb.append("\nSHIZUKU_VERSION: ${Shizuku.getVersion()}")
             }
             return sb.toString()
         }
