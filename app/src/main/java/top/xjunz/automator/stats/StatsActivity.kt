@@ -107,13 +107,19 @@ class StatsActivity : AppCompatActivity() {
             }
         }
 
+        private val detailViewModel by lazy {
+            ViewModelProvider(this@StatsActivity).get(DetailFragment.DetailViewModel::class.java)
+        }
+
         inner class RecordViewHolder constructor(val binding: ItemRecordBinding) : RecyclerView.ViewHolder(binding.root) {
             init {
                 binding.root.setOnClickListener {
-                    DetailFragment().setRecordWrapper(statsViewModel.requireRecords()[adapterPosition])
-                        .setIcon(binding.ivAppIcon.drawable)
-                        .setAppName(binding.tvAppName.text)
-                        .show(supportFragmentManager, "detail")
+                    detailViewModel.apply {
+                        appIcon = binding.ivAppIcon.drawable
+                        appName = binding.tvAppName.text
+                        setRecordWrapper(statsViewModel.requireRecords()[adapterPosition])
+                    }
+                    DetailFragment().show(supportFragmentManager, "detail")
                 }
             }
         }

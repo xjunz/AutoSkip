@@ -8,6 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import top.xjunz.automator.R
 import top.xjunz.automator.app.AutomatorApp
 import top.xjunz.automator.databinding.FragmentDetailBinding
@@ -21,33 +23,27 @@ import top.xjunz.automator.util.setVisible
  */
 class DetailFragment : DialogFragment() {
     private lateinit var binding: FragmentDetailBinding
-    private lateinit var record: Record
-    private lateinit var wrapper: RecordWrapper
-    private lateinit var appIcon: Drawable
-    private lateinit var appName: CharSequence
+    private val vm by lazy {
+        ViewModelProvider(requireActivity()).get(DetailViewModel::class.java)
+    }
     private val handler by lazy {
         Handler(Looper.getMainLooper())
+    }
+
+    class DetailViewModel : ViewModel() {
+        lateinit var record: Record
+        lateinit var wrapper: RecordWrapper
+        lateinit var appIcon: Drawable
+        lateinit var appName: CharSequence
+        fun setRecordWrapper(wrapper: RecordWrapper) {
+            this.wrapper = wrapper
+            this.record = wrapper.source
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NO_TITLE, R.style.Base_Dialog)
-    }
-
-    fun setRecordWrapper(wrapper: RecordWrapper): DetailFragment {
-        this.wrapper = wrapper
-        this.record = wrapper.source
-        return this
-    }
-
-    fun setIcon(icon: Drawable): DetailFragment {
-        this.appIcon = icon
-        return this
-    }
-
-    fun setAppName(name: CharSequence): DetailFragment {
-        this.appName = name
-        return this
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -64,19 +60,19 @@ class DetailFragment : DialogFragment() {
 
     private fun initViews() {
         binding.apply {
-            tvAppName.text = appName
-            ivAppIcon.setImageDrawable(appIcon)
-            tvPkgName.text = record.pkgName
-            if (record.firstTimestamp > 0) {
-                tvStartTime.text = getString(R.string.format_first_time, formatTime(record.firstTimestamp))
+            tvAppName.text = vm.appName
+            ivAppIcon.setImageDrawable(vm.appIcon)
+            tvPkgName.text = vm.record.pkgName
+            if (vm.record.firstTimestamp > 0) {
+                tvStartTime.text = getString(R.string.format_first_time, formatTime(vm.record.firstTimestamp))
             } else {
                 tvStartTime.setVisible(false)
             }
-            if (record.latestTimestamp > 0) {
-                tvEndTime.text = getString(R.string.format_latest_time, formatTime(record.latestTimestamp))
-                if (record.firstTimestamp > 0) {
-                    tvDuration.text = wrapper.getFormattedDuration()
-                    tvAveCount.text = getString(R.string.format_count_per_day, wrapper.getFrequencyPerDay())
+            if (vm.record.latestTimestamp > 0) {
+                tvEndTime.text = getString(R.string.format_latest_time, formatTime(vm.record.latestTimestamp))
+                if (vm.record.firstTimestamp > 0) {
+                    tvDuration.text = vm.wrapper.getFormattedDuration()
+                    tvAveCount.text = getString(R.string.format_count_per_day, vm.wrapper.getFrequencyPerDay())
                 } else {
                     tvAveCount.setVisible(false)
                     tvDuration.setVisible(false)
@@ -85,13 +81,13 @@ class DetailFragment : DialogFragment() {
                 tvEndTime.setVisible(false)
                 tvAveCount.setVisible(false)
             }
-            tvCount.text = getString(R.string.format_total_count, record.count)
+            tvCount.text = getString(R.string.format_total_count, vm.record.count)
         }
     }
 
 
     private fun initDummyFrame() {
-        val rect = record.portraitBounds ?: record.landscapeBounds ?: return
+        val rect = vm.record.portraitBounds ?: vm.record.landscapeBounds ?: return
         binding.run {
             val dummyCloseupShrinkRatio = 3 / 4f
             dummyFrameCloseup.apply {
@@ -104,7 +100,7 @@ class DetailFragment : DialogFragment() {
                         visibility = View.VISIBLE
                         width = (rect.width() * dummyCloseupShrinkRatio).toInt()
                         height = (rect.height() * dummyCloseupShrinkRatio).toInt()
-                        text = record.text
+                        text = vm.record.text
                         startCountDown()
                         if (rect.centerY() < AutomatorApp.getScreenHeight() / 2) {
                             dummyFrameCloseup.setBackgroundResource(R.drawable.bg_frame_closeup_top)
@@ -126,7 +122,7 @@ class DetailFragment : DialogFragment() {
 
     private var countDownRunnable: Runnable? = null
     private fun startCountDown() {
-        record.text?.run {
+        vm.record.text?.run {
             var countdown = -1
             var index = -1
             forEachIndexed { i, char ->
