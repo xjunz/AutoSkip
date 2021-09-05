@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity() {
                     MaterialAlertDialogBuilder(this@MainActivity)
                         .setTitle(R.string.error_occurred)
                         .setPositiveButton(android.R.string.ok, null)
-                        .setMessage(readStackTrace(it)).show()
+                        .setMessage(it.stackTraceToString()).show()
                     error.value = null
                 }
             }
