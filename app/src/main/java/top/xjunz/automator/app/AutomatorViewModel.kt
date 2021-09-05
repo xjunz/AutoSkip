@@ -169,12 +169,12 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
                         try {
                             Log.i(tag, sayHello())
                             binder.linkToDeath(deathRecipient, 0)
-                            if (!isConnected) {
+                            if (!isMonitoring) {
                                 setBasicEnvInfo(AutomatorApp.getBasicEnvInfo())
-                                connect()
                                 initFileDescriptors()
                                 setFileDescriptors(pfds)
-                                Log.i(tag, "The automator is connected successfully!")
+                                startMonitoring()
+                                Log.i(tag, "Monitoring started successfully!")
                             }
                             skippingTimes.value = skippingCount
                             serviceStartTimestamp = startTimestamp
@@ -257,7 +257,7 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
     //https://youtrack.jetbrains.com/issue/KTIJ-838
     @Suppress("BlockingMethodInNonBlockingContext")
     fun readSkippingCountWhenNecessary() {
-        if (skippingTimes.value != null && isServiceConnected()) {
+        if (skippingTimes.value != null && isServiceAlive()) {
             return
         }
         viewModelScope.launch {
@@ -294,8 +294,6 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
     }
 
     fun isServiceAlive(): Boolean = automatorService?.asBinder()?.pingBinder() ?: false
-
-    private fun isServiceConnected(): Boolean = isServiceAlive() && automatorService!!.isConnected
 
     private inline fun whenServiceIsAlive(block: IAutomatorConnection.() -> Unit) {
         if (isServiceAlive()) {

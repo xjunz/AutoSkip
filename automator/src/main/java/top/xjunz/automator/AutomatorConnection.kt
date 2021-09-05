@@ -4,8 +4,6 @@ import `$android`.app.UiAutomation
 import `$android`.app.UiAutomationConnection
 import `$android`.hardware.input.InputManager
 import android.accessibilityservice.AccessibilityServiceInfo
-import android.accessibilityservice.IAccessibilityServiceClient
-import android.content.Context
 import android.content.pm.IPackageManager
 import android.graphics.Rect
 import android.os.*
@@ -17,7 +15,6 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import android.view.accessibility.IAccessibilityManager
 import rikka.shizuku.SystemServiceHelper
 import top.xjunz.automator.model.Result
 import top.xjunz.automator.util.Records
@@ -43,7 +40,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         const val MAX_RECORD_COUNT: Short = 500
     }
 
-    private lateinit var uiAutomation: UiAutomation
+    private var uiAutomation: UiAutomation
     private val handlerThread = HandlerThread("AutomatorHandlerThread")
     private val handler by lazy {
         Handler(handlerThread.looper)
@@ -58,20 +55,18 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     private val records by lazy {
         Records(recordFileDescriptor!!.fileDescriptor)
     }
+    private var monitoring: Boolean = false
 
-    override fun connect() {
-        check(!handlerThread.isAlive) { "Already connected!" }
+    init {
         try {
             log("========Start Connecting========", true)
             log(sayHello(), true)
             handlerThread.start()
             uiAutomation = UiAutomation(handlerThread.looper, UiAutomationConnection())
             uiAutomation.connect()
-            startMonitoring()
-            serviceStartTimestamp = System.currentTimeMillis()
-            log("Monitoring started at ${formatCurrentTime()}", true)
+            log("The UiAutomation is connected at ${formatCurrentTime()}", true)
         } catch (t: Throwable) {
-            dumpError(t, true)
+            dumpError(t)
             exitProcess(0)
         }
     }
@@ -111,15 +106,12 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         log(sb.toString(), queued)
     }
 
-    private fun dumpError(t: Throwable, queued: Boolean): String {
-        val out = ByteArrayOutputStream()
-        t.printStackTrace(PrintStream(out))
-        out.close()
-        log("========Error Occurred========", queued)
-        return out.toString().also { log(it, queued) }
+    private fun dumpError(t: Throwable) {
+        log("========Error Occurred========", true)
+        log(t.stackTraceToString(), true)
     }
 
-    private fun startMonitoring() {
+    override fun startMonitoring() {
         uiAutomation.serviceInfo = AccessibilityServiceInfo().apply {
             eventTypes = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED or AccessibilityEvent.TYPE_WINDOWS_CHANGED
             flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS //or AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
@@ -155,44 +147,19 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
                 }
             } catch (t: Throwable) {
                 monitorResult.maskReason(Result.REASON_ERROR)
-                dumpError(t, true)
+                dumpError(t)
             } finally {
                 event.recycle()
             }
         }
+        serviceStartTimestamp = System.currentTimeMillis()
+        monitoring = true
+        log("The monitoring is started at ${formatCurrentTime()}", true)
     }
 
-    /**
-     * Calling [UiAutomation.disconnect] would cause an error because the uid  (host app) calling
-     * [UiAutomation.connect] is not the same as the uid (shell/root) calling disconnect(). Then we
-     * just bypass this check and call the final unregistering method. There is also a way to fix
-     * this by calling connect() in the constructor but this would also fail when the shizuku server
-     * restarts and changes its mode from root to shell.
-     *
-     * @see <a href="https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/app/UiAutomationConnection.java;l=115;bpv=0;bpt=1">
-     * frameworks/base/core/java/android/app/UiAutomationConnection.java</a>
-     */
-    override fun disconnect() {
-        check(handlerThread.isAlive) { "Already disconnected!" }
-        try {
-            val manager: IAccessibilityManager = IAccessibilityManager.Stub.asInterface(
-                SystemServiceHelper.getSystemService(Context.ACCESSIBILITY_SERVICE)
-            )
-            UiAutomation::class.java.getDeclaredField("mClient").run {
-                isAccessible = true
-                manager.unregisterUiTestAutomationService(get(uiAutomation) as IAccessibilityServiceClient)
-                set(uiAutomation, null)
-            }
-        } catch (t: Throwable) {
-            dumpError(t, true)
-        } finally {
-            handlerThread.quitSafely()
-        }
-    }
+    override fun isMonitoring() = monitoring
 
     override fun sayHello() = "Hello from the remote service! My uid is ${Os.geteuid()} & my pid is ${Os.getpid()}"
-
-    override fun isConnected() = handlerThread.isAlive
 
     override fun getStartTimestamp() = serviceStartTimestamp
 
@@ -225,7 +192,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
             if (t is Records.ParseException) {
                 log(t.message, true)
             } else {
-                dumpError(t, true)
+                dumpError(t)
             }
         }
     }
@@ -259,14 +226,15 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
             try {
                 uiAutomation.rootInActiveWindow.findAccessibilityNodeInfosByText("跳过").forEach {
                     checkSource(it, standaloneResult.apply { reset() }, false)
-                    //dump the result before calling the listener, cuz a marshall of result would
-                    // recycle the node, hence, we could not dump it any more.
-                    dumpResult(standaloneResult, false)
-                    listener.onCheckResult(standaloneResult)
                 }
             } catch (t: Throwable) {
-                dumpError(t, false)
+                dumpError(t)
                 standaloneResult.maskReason(Result.REASON_ERROR)
+            } finally {
+                //dump the result before calling the listener, cuz a marshall of result would
+                // recycle the node, hence, we could not dump it any more.
+                dumpResult(standaloneResult, !standaloneResult.passed)
+                listener.onCheckResult(standaloneResult)
             }
         }
     }
@@ -404,7 +372,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
             Os.ftruncate(pfd.fileDescriptor, 0)
             Os.lseek(pfd.fileDescriptor, 0, SEEK_SET)
         } catch (e: ErrnoException) {
-            dumpError(e, false)
+            dumpError(e)
         }
     }
 
@@ -443,8 +411,8 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     }
 
     private fun persistRecords() {
-        if (!records.isEmpty()) {
-            recordFileDescriptor?.run {
+        recordFileDescriptor?.run {
+            if (!records.isEmpty()) {
                 truncate(this)
                 ParcelFileDescriptor.AutoCloseOutputStream(this).bufferedWriter().use {
                     records.forEach { record ->
@@ -459,7 +427,15 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
 
 
     override fun destroy() {
-        disconnect()
-        exitProcess(0)
+        try {
+            uiAutomation.disconnect()
+        } catch (t: Throwable) {
+            dumpError(t)
+        } finally {
+            if (handlerThread.isAlive) {
+                handlerThread.quitSafely()
+            }
+            exitProcess(0)
+        }
     }
 }

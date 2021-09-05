@@ -11,13 +11,11 @@ import java.util.List;
 
 interface IAutomatorConnection {
 
-    void connect()=1;
+    String sayHello()=1;
 
-    void disconnect()=2;
+    void startMonitoring()=2;
 
-    String sayHello()=5;
-
-    boolean isConnected()=6;
+    boolean isMonitoring()=3;
 
     long getStartTimestamp()=8;
 
