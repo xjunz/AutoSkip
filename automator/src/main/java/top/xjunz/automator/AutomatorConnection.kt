@@ -63,7 +63,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
             log(sayHello(), true)
             handlerThread.start()
             uiAutomation = UiAutomation(handlerThread.looper, UiAutomationConnection())
-            uiAutomation.connect()
+            uiAutomation.connect(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
             log("The UiAutomation is connected at ${formatCurrentTime()}", true)
         } catch (t: Throwable) {
             dumpError(t)
