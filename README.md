@@ -36,6 +36,7 @@
 const val ALIPAY_DONATE_URL ="xxx"
 const val EMAIL_ADDRESS = "xxx"
 const val APP_DOWNLOAD_URL = "xxx"
+const val FEEDBACK_GROUP_URL = "xxx"
 ```
 
 - 在项目根目录下建立`sign.properties`，在其中配置自定义签名信息:

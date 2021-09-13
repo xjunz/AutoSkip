@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         it.isChecked = isAutoStartEnabled()
                     }
-                    R.id.item_feedback -> {
+                    R.id.item_feedback_email -> {
                         viewModel.dumpLog()
                         if (getFileStreamPath(LOG_FILE_NAME).exists()) {
                             val uri = FileProvider.getUriForFile(this@MainActivity, "top.xjunz.automator.provider.file", logFile)
@@ -126,6 +126,7 @@ class MainActivity : AppCompatActivity() {
                             sendMailTo(this@MainActivity, null)
                         }
                     }
+                    R.id.item_feedback_group -> viewUrl(this@MainActivity, FEEDBACK_GROUP_URL)
                     R.id.item_about -> AboutFragment().show(supportFragmentManager, "about")
                 }
                 return@setOnMenuItemClickListener true

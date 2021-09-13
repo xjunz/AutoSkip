@@ -74,9 +74,11 @@
     <string name="source_code">源代码</string>
     <string name="update">下载最新版</string>
     <string name="mail_subject">「自动跳过」反馈 %s</string>
-    <string name="mail_body">%s\n问题描述:\n</string>
+    <string name="mail_body">%s\n*使用Gmail等邮箱软件可自动添加附件。如当前邮箱软件无法添加附件，烦请导出日志后手动添加该日志为附件。*\n问题描述:\n</string>
     <string name="license">此应用以Apache-2.0 License协议<a href='https://github.com/xjunz/AutoSkip'>开源</a>。
         如果您喜欢此应用，可以点击下方「捐赠」按钮以支持我的工作。</string>
     <string name="cr">Copyright © XJUNZ 2021</string>
     <string name="no_log">无日志</string>
+    <string name="feedback_group">加群</string>
+    <string name="feedback_email">邮件</string>
 </resources>
