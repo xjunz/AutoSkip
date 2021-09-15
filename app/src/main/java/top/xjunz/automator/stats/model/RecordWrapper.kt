@@ -1,14 +1,14 @@
 package top.xjunz.automator.stats.model
 
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
-import me.zhanghai.android.appiconloader.AppIconLoader
 import top.xjunz.automator.R
 import top.xjunz.automator.app.AutomatorApp
 import top.xjunz.automator.model.Record
-import top.xjunz.automator.util.dp2px
+import top.xjunz.automator.util.iconLoader
 import java.lang.ref.WeakReference
 
 /**
@@ -18,11 +18,6 @@ import java.lang.ref.WeakReference
  */
 data class RecordWrapper(val source: Record) {
     companion object {
-        @JvmStatic
-        private val iconLoader by lazy {
-            AppIconLoader(dp2px(48).toInt(), true, AutomatorApp.appContext)
-        }
-
         @JvmStatic
         private val packageManager by lazy {
             AutomatorApp.appContext.packageManager
@@ -51,6 +46,7 @@ data class RecordWrapper(val source: Record) {
         return source.count / day.coerceAtLeast(1f)
     }
 
+    @Throws(PackageManager.NameNotFoundException::class)
     private fun requireAppInfo(): ApplicationInfo {
         if (appInfo == null || appInfo?.get() == null) {
             appInfo = WeakReference(packageManager.getApplicationInfo(source.pkgName, 0))
@@ -64,22 +60,22 @@ data class RecordWrapper(val source: Record) {
 
     fun getLabel(): String? {
         if (!labelLoaded) {
-            try {
+            runCatching {
                 label = requireAppInfo().loadLabel(packageManager).toString()
-            } finally {
-                labelLoaded = true
             }
+            labelLoaded = true
         }
         return label
     }
 
     suspend fun loadIcon(): Bitmap? {
         if (!iconLoaded) {
-            try {
-                Dispatchers.IO.invoke { icon = iconLoader.loadIcon(requireAppInfo()) }
-            } finally {
-                iconLoaded = true
+            Dispatchers.IO.invoke {
+                runCatching {
+                    icon = iconLoader.loadIcon(requireAppInfo())
+                }
             }
+            iconLoaded = true
         }
         return icon
     }
