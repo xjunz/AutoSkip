@@ -59,12 +59,12 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
 
     init {
         try {
-            log("========Start Connecting========", true)
-            log(sayHello(), true)
+            log("========Start Connecting========")
+            log(sayHello())
             handlerThread.start()
             uiAutomation = UiAutomation(handlerThread.looper, UiAutomationConnection())
-            uiAutomation.connect(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
-            log("The UiAutomation is connected at ${formatCurrentTime()}", true)
+            uiAutomation.connect()
+            log("The UiAutomation is connected at ${formatCurrentTime()}")
         } catch (t: Throwable) {
             dumpError(t)
             exitProcess(0)
@@ -76,7 +76,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
             ?.getHomeActivities(arrayListOf())?.packageName
     }
 
-    private fun log(any: Any?, queued: Boolean) {
+    private fun log(any: Any?, queued: Boolean = true) {
         (any?.toString() ?: "null").let {
             Log.i(TAG, it)
             if (queued) {
@@ -96,7 +96,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     private fun dumpResult(result: Result, queued: Boolean) {
         if (firstCheckRecordIndex == -1) firstCheckRecordIndex = recordQueue.size
         val sb = StringBuilder()
-        sb.append("========${if (queued) "" else "Standalone "}Check Result========")
+        sb.append("========Check Result========")
             .append("\ntimestamp: ${formatCurrentTime()}")
             .append("\nresult: $result")
         if (result.passed) {
@@ -107,17 +107,18 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     }
 
     private fun dumpError(t: Throwable) {
-        log("========Error Occurred========", true)
-        log(t.stackTraceToString(), true)
+        log("========Error Occurred========")
+        log(t.stackTraceToString())
     }
 
     override fun startMonitoring() {
-        uiAutomation.serviceInfo = AccessibilityServiceInfo().apply {
-            eventTypes = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED or AccessibilityEvent.TYPE_WINDOWS_CHANGED
-            flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS //or AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
-        }
         var distinct = false
         var oldPkgName: String? = null
+        uiAutomation.serviceInfo = uiAutomation.serviceInfo.apply {
+            eventTypes = AccessibilityEvent.TYPE_WINDOWS_CHANGED or AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+            flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
+        }
+        log(uiAutomation.serviceInfo)
         uiAutomation.setOnAccessibilityEventListener listener@{ event ->
             try {
                 val packageName = event.packageName?.toString() ?: return@listener
@@ -154,7 +155,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         }
         serviceStartTimestamp = System.currentTimeMillis()
         monitoring = true
-        log("The monitoring is started at ${formatCurrentTime()}", true)
+        log("The monitoring is started at ${formatCurrentTime()}")
     }
 
     override fun isMonitoring() = monitoring
@@ -175,29 +176,29 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         checkNotNull(logFileDescriptor)
         recordFileDescriptor = pfds[2]
         checkNotNull(recordFileDescriptor)
-        log("File descriptors received", true)
+        log("File descriptors received")
         try {
             FileInputStream(countFileDescriptor!!.fileDescriptor).bufferedReader().useLines {
                 skippingCount = it.firstOrNull()?.toIntOrNull() ?: 0
-                log("The skipping count parsed: $skippingCount", true)
+                log("The skipping count parsed: $skippingCount")
             }
             records.parse().getRecordCount().also {
                 if (skippingCount != it) {
                     skippingCount = it
-                    log("Skipping count inconsistency detected! Reassign the skipping count to $it", true)
+                    log("Skipping count inconsistency detected! Reassign the skipping count to $it")
                 }
             }
-            log("The record file parsed", true)
+            log("The record file parsed")
         } catch (t: Throwable) {
             if (t is Records.ParseException) {
-                log(t.message, true)
+                log(t.message)
             } else {
                 dumpError(t)
             }
         }
     }
 
-    override fun setBasicEnvInfo(info: String?) = log(info, true)
+    override fun setBasicEnvInfo(info: String?) = log(info)
 
     override fun setSkippingCount(count: Int) {
         check(count > -1)
@@ -378,7 +379,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
 
     init {
         Runtime.getRuntime().addShutdownHook(Thread {
-            log("Service is dead at ${formatCurrentTime()}. Goodbye, world!", true)
+            log("Service is dead at ${formatCurrentTime()}. Goodbye, world!")
             persistSkippingCount()
             persistRecords()
             persistLog()
