@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import rikka.shizuku.Shizuku
+import rikka.sui.Sui
 import top.xjunz.automator.BuildConfig
 
 /**
@@ -49,6 +50,7 @@ class AutomatorApp : Application(), ViewModelStoreOwner {
 
     override fun onCreate() {
         super.onCreate()
+        Sui.init(BuildConfig.APPLICATION_ID)
         appContext = applicationContext
         me = this
     }

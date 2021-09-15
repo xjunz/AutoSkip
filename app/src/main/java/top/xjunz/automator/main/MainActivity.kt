@@ -16,6 +16,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import rikka.shizuku.Shizuku
+import rikka.sui.Sui
 import top.xjunz.automator.*
 import top.xjunz.automator.app.*
 import top.xjunz.automator.autostart.enableShizukuAutoStart
@@ -109,11 +110,15 @@ class MainActivity : AppCompatActivity() {
                     R.id.item_auto_start -> if (it.isChecked) {
                         setAutoStartComponentEnable(false)
                     } else {
-                        if (isShizukuAutoStartEnabled() || enableShizukuAutoStart()) {
+                        if (Sui.isSui()) {
                             setAutoStartComponentEnable(true)
                         } else {
-                            toast(getString(R.string.pls_turn_on_shizuku_auto_start))
-                            launchShizukuManager()
+                            if (isShizukuAutoStartEnabled() || enableShizukuAutoStart()) {
+                                setAutoStartComponentEnable(true)
+                            } else {
+                                toast(getString(R.string.pls_turn_on_shizuku_auto_start))
+                                launchShizukuManager()
+                            }
                         }
                         it.isChecked = isAutoStartEnabled()
                     }

@@ -7,6 +7,7 @@ import android.system.Os
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuBinderWrapper
 import rikka.shizuku.SystemServiceHelper
+import rikka.sui.Sui
 import top.xjunz.automator.BuildConfig
 import top.xjunz.automator.app.AutomatorApp
 import top.xjunz.automator.util.SHIZUKU_PACKAGE_NAME
@@ -47,7 +48,7 @@ fun enableShizukuAutoStart(): Boolean {
 }
 
 fun isAutoStartEnabled(): Boolean {
-    return isComponentEnabled(myAutoStartComponentName) && isShizukuAutoStartEnabled()
+    return Sui.isSui() || isComponentEnabled(myAutoStartComponentName) && isShizukuAutoStartEnabled()
 }
 
 fun setAutoStartComponentEnable(enabled: Boolean) {
@@ -60,10 +61,10 @@ fun setAutoStartComponentEnable(enabled: Boolean) {
 }
 
 fun isShizukuAutoStartEnabled(): Boolean {
-    return isComponentEnabled(shizukuAutoStartComponentName, true)
+    return isComponentEnabled(shizukuAutoStartComponentName)
 }
 
-private fun isComponentEnabled(componentName: ComponentName, def: Boolean = false): Boolean {
+private fun isComponentEnabled(componentName: ComponentName, def: Boolean = true): Boolean {
     return try {
         when (packageManager.getComponentEnabledSetting(componentName)) {
             PackageManager.COMPONENT_ENABLED_STATE_DISABLED -> false

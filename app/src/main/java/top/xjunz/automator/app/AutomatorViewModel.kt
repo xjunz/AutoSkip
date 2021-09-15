@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
-import rikka.sui.Sui
 import top.xjunz.automator.AutomatorConnection
 import top.xjunz.automator.BuildConfig
 import top.xjunz.automator.IAutomatorConnection
@@ -35,7 +34,6 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
     var initialized = false
 
     fun init() {
-        Sui.init(BuildConfig.APPLICATION_ID)
         Shizuku.addBinderReceivedListenerSticky(binderReceivedListener)
         Shizuku.addBinderDeadListener(binderDeadListener)
         readSkippingCount()
@@ -98,8 +96,6 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
     fun syncShizukuInstallationState() {
         isInstalled.value = runCatching {
             app.packageManager.getApplicationInfo(SHIZUKU_PACKAGE_NAME, PackageManager.GET_UNINSTALLED_PACKAGES)
-        }.onFailure {
-            error.value = it
         }.isSuccess
     }
 
