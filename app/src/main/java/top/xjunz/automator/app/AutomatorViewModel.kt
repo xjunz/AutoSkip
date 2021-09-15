@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
+import rikka.sui.Sui
 import top.xjunz.automator.AutomatorConnection
 import top.xjunz.automator.BuildConfig
 import top.xjunz.automator.IAutomatorConnection
@@ -31,14 +32,17 @@ import java.util.concurrent.TimeoutException
  */
 class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(app) {
     private val tag = "Automator"
+    var initialized = false
 
-    fun injectListeners() {
+    fun init() {
+        Sui.init(BuildConfig.APPLICATION_ID)
         Shizuku.addBinderReceivedListenerSticky(binderReceivedListener)
         Shizuku.addBinderDeadListener(binderDeadListener)
+        readSkippingCount()
     }
 
     companion object {
-        const val BINDING_SERVICE_TIME_OUT_MILLS = 5000L
+        const val BINDING_SERVICE_TIMEOUT_MILLS = 5000L
         fun get(): AutomatorViewModel {
             return ViewModelProvider(AutomatorApp.me, ViewModelProvider.AndroidViewModelFactory(AutomatorApp.me))
                 .get(AutomatorViewModel::class.java)
@@ -69,7 +73,7 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
     /**
      * Whether the shizuku manager is installed and enabled.
      */
-    val isUsable = MutableLiveData<Boolean>()
+    val isInstalled = MutableLiveData<Boolean>()
 
     /**
      * Whether the auto starter has tried to start the service on boot no matter whether it succeeded
@@ -91,11 +95,11 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
     /**
      * Check whether the Shizuku manager is installed on this device.
      */
-    fun syncShizukuUsabilityState() {
-        isUsable.value = runCatching {
-            app.packageManager.getApplicationInfo(SHIZUKU_PACKAGE_NAME, 0)
-            val enabled = app.packageManager.getApplicationEnabledSetting(SHIZUKU_PACKAGE_NAME)
-            check(enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED || enabled == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
+    fun syncShizukuInstallationState() {
+        isInstalled.value = runCatching {
+            app.packageManager.getApplicationInfo(SHIZUKU_PACKAGE_NAME, PackageManager.GET_UNINSTALLED_PACKAGES)
+        }.onFailure {
+            error.value = it
         }.isSuccess
     }
 
@@ -109,6 +113,8 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
      *
      * Shizuku has no build-in apis to judge whether a user service is still alive or not.
      * Then we have to fallback using the 'ps' cmd.
+     *
+     * V12: [Shizuku.peekUserService] is not safe in some cases.
      */
     @Suppress("Deprecation")
     fun bindRunningServiceOrKill() = viewModelScope.launch {
@@ -205,7 +211,7 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
     private fun bindServiceLocked(): Boolean = synchronized(lock) {
         try {
             Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-            lock.wait(BINDING_SERVICE_TIME_OUT_MILLS)
+            lock.wait(BINDING_SERVICE_TIMEOUT_MILLS)
         } catch (t: Throwable) {
             t.printStackTrace()
             return false
@@ -224,8 +230,8 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
                 synchronized(lock) {
                     notified = false
                     Shizuku.bindUserService(userServiceStandaloneProcessArgs, userServiceConnection)
-                    lock.wait(BINDING_SERVICE_TIME_OUT_MILLS)
-                    if (!notified) throw TimeoutException("binding the remote service timed out")
+                    lock.wait(BINDING_SERVICE_TIMEOUT_MILLS)
+                    if (!notified) throw TimeoutException("Timeout while connecting to the remote service")
                 }
             }
         } catch (t: Throwable) {
@@ -235,20 +241,9 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
         }
     }
 
-
-    private fun unbindService(kill: Boolean): Boolean = try {
-        Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, kill)
-        isRunning.value = false
-        true
-    } catch (t: Throwable) {
-        t.printStackTrace()
-        error.value = t
-        false
-    }
-
     fun toggleService() {
         if (isRunning.value == true) {
-            unbindService(true)
+            Shizuku.unbindUserService(userServiceStandaloneProcessArgs, userServiceConnection, true)
         } else {
             bindService()
         }
@@ -256,22 +251,17 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
 
     //https://youtrack.jetbrains.com/issue/KTIJ-838
     @Suppress("BlockingMethodInNonBlockingContext")
-    fun readSkippingCountWhenNecessary() {
-        if (skippingTimes.value != null && isServiceAlive()) {
-            return
-        }
-        viewModelScope.launch {
-            var times = 0
-            withContext(Dispatchers.IO) {
-                val file = app.getFileStreamPath(COUNT_FILE_NAME)
-                if (file.exists()) {
-                    FileInputStream(file).bufferedReader().useLines {
-                        times = it.firstOrNull()?.toIntOrNull() ?: 0
-                    }
+    fun readSkippingCount() = viewModelScope.launch {
+        var times = 0
+        withContext(Dispatchers.IO) {
+            val file = app.getFileStreamPath(COUNT_FILE_NAME)
+            if (file.exists()) {
+                FileInputStream(file).bufferedReader().useLines {
+                    times = it.firstOrNull()?.toIntOrNull() ?: 0
                 }
             }
-            skippingTimes.value = times
         }
+        skippingTimes.value = times
     }
 
     private fun initFileDescriptors() {
@@ -322,14 +312,6 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
         if (Shizuku.pingBinder()) {
             isGranted.value = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
         }
-    }
-
-    fun detachFromService() {
-        whenServiceIsAlive {
-            asBinder().unlinkToDeath(deathRecipient, 0)
-        }
-        Shizuku.removeBinderDeadListener(binderDeadListener)
-        unbindService(false)
     }
 
     fun getRecordListFromRemote(): MutableList<Record>? {

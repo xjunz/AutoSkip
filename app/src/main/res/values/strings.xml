@@ -2,8 +2,8 @@
     <string name="app_name">自动跳过</string>
     <string name="skip_in_seconds">跳过 %s 秒</string>
     <string name="activate_via_shizuku">使用<b> Shizuku </b>激活</string>
-    <string name="intro_to_shizuku">本服务需要Shizuku的授权才能正常使用。Shizuku是一个健壮且可信的开源项目，
-        你可以在<a href='https://github.com/RikkaApps/Shizuku'>这里</a>查看源代码和更多详细信息。</string>
+    <string name="intro_to_shizuku">本服务需要Shizuku的授权才能正常使用，如果您已安装<a href="https://github.com/RikkaApps/Sui">Sui</a>，
+        那么也可通过Sui启动。Shizuku是一个安全可信的开源项目，你可以在<a href='https://github.com/RikkaApps/Shizuku'>这里</a>查看源代码和更多详细信息。</string>
     <string name="more_to_say">本应用专注于帮助您跳过应用的启动广告/宣传页。\n\n
         相比于其他同类产应用，本应用有以下优点：\n\n
         • 不需要您手动开启辅助功能\n
@@ -33,7 +33,7 @@
     <string name="pls_activate_service">请先在下方激活服务</string>
     <string name="service_connecting">正在启动服务…</string>
     <string name="launch_shizuku_client">打开Shizuku</string>
-    <string name="pls_grant_manually">请手动为此应用授权</string>
+    <string name="pls_grant_manually">您已选择「拒绝且不再询问」该应用的权限申请，请手动打开授权管理器进行授权。</string>
     <string name="error_occurred">发生错误</string>
     <string name="dump_log">导出日志</string>
     <string name="dump_log_failed">导出日志失败</string>
@@ -81,4 +81,5 @@
     <string name="no_log">无日志</string>
     <string name="feedback_group">加群</string>
     <string name="feedback_email">邮件</string>
+    <string name="night_mode">夜间模式</string>
 </resources>
