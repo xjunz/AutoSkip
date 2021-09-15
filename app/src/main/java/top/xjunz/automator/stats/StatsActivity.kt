@@ -15,6 +15,7 @@ import top.xjunz.automator.app.RECORD_FILE_NAME
 import top.xjunz.automator.databinding.ActivityStatsBinding
 import top.xjunz.automator.databinding.ItemRecordBinding
 import top.xjunz.automator.stats.model.SortBy
+import top.xjunz.automator.util.desaturatedMyIconDrawable
 import top.xjunz.automator.util.formatTime
 
 /**
@@ -93,7 +94,7 @@ class StatsActivity : AppCompatActivity() {
                     if (icon != null) {
                         ivAppIcon.setImageBitmap(icon)
                     } else {
-                        ivAppIcon.setImageResource(R.mipmap.ic_launcher)
+                        ivAppIcon.setImageDrawable(desaturatedMyIconDrawable)
                     }
                     val label = record.getLabel()
                     if (label.isNullOrBlank()) {

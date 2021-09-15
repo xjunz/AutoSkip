@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
     private val statusObserver by lazy {
         Observer<Boolean> {
             viewModel.run {
-                val enabled = isAvailable.value == true && isGranted.value == true && isUsable.value == true
+                val enabled = isAvailable.value == true && isGranted.value == true
                 binding.btnRun.isEnabled = isRunning.value == true || (isBinding.value != true && enabled)
                 mainHandler.removeCallbacks(updateDurationTask)
                 if (isRunning.value == true) {
@@ -140,6 +140,8 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initViews() {
         TopBarController(binding.topBar, binding.scrollView).init()
+        binding.root.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         binding.ibMenu.setOnTouchListener(popupMenu.dragToOpenListener)
         viewModel.apply {
             isGranted.observe(this@MainActivity, statusObserver)
@@ -165,18 +167,15 @@ class MainActivity : AppCompatActivity() {
                     isAutoStarted.value = null
                 }
             }
-            injectListeners()
-            readSkippingCountWhenNecessary()
+            if (!initialized) init()
         }
     }
 
-    override fun onTopResumedActivityChanged(isTopResumedActivity: Boolean) {
-        super.onTopResumedActivityChanged(isTopResumedActivity)
-        if (isTopResumedActivity) {
-            viewModel.syncShizukuUsabilityState()
-            viewModel.updateGranted()
-            viewModel.updateSkippingCount()
-        }
+    override fun onResume() {
+        super.onResume()
+        viewModel.syncShizukuInstallationState()
+        viewModel.updateGranted()
+        viewModel.updateSkippingCount()
     }
 
     private fun toast(msg: String) {
@@ -215,7 +214,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun performShizukuAction(view: View) {
-        if (viewModel.isUsable.value == true) {
+        if (viewModel.isInstalled.value == true) {
             launchShizukuManager()
         } else {
             startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl)), null))
@@ -230,9 +229,6 @@ class MainActivity : AppCompatActivity() {
 
     fun requestPermission(view: View) {
         if (Shizuku.shouldShowRequestPermissionRationale()) {
-            packageManager.getLaunchIntentForPackage(SHIZUKU_PACKAGE_NAME)?.let {
-                startActivity(it)
-            }
             toast(getString(R.string.pls_grant_manually))
         } else {
             if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_DENIED) {
@@ -245,11 +241,6 @@ class MainActivity : AppCompatActivity() {
                 viewModel.isGranted.value = true
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.detachFromService()
     }
 
     fun testAvailability(view: View) {
