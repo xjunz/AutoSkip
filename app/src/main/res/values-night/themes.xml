@@ -1,4 +1,5 @@
 <resources>
+    <bool name="is_night_mode">true</bool>
     <!-- Base application theme. -->
     <style name="Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
@@ -13,5 +14,10 @@
         <item name="android:lineSpacingExtra">1dp</item>
         <item name="colorTopBarTint">?android:colorBackground</item>
         <item name="colorTestBackground">?colorBackgroundFloating</item>
+    </style>
+
+    <style name="Base.Automator.Scrim">
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 </resources>

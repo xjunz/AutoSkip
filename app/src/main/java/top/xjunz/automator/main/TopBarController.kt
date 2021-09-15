@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat.getColorStateList
 import androidx.core.view.OneShotPreDrawListener
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.NestedScrollView
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import com.google.android.material.shape.MaterialShapeDrawable
@@ -61,11 +62,9 @@ class TopBarController(private val topBar: View, private val scrollView: NestedS
                     elevation = zPixel * (1 - f)
                     fillColor = ColorStateList.valueOf(evaluator.evaluate((1 - f), topBarBackColor.defaultColor, toolbarTintColor) as Int)
                 }
-                topBar.apply {
-                    layoutParams = (layoutParams as ViewGroup.MarginLayoutParams).apply {
-                        marginStart = (f * margin).toInt()
-                        marginEnd = (f * margin).toInt()
-                    }
+                topBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    marginStart = (f * margin).toInt()
+                    marginEnd = (f * margin).toInt()
                 }
             }
             duration = 168

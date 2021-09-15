@@ -1,4 +1,5 @@
 <resources>
+    <bool name="is_night_mode">false</bool>
 
     <style name="Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
@@ -22,12 +23,13 @@
         </item>
     </style>
 
-    <style name="Base.Automator.Translucent">
-        <item name="android:windowTranslucentStatus">true</item>
+    <style name="Base.Automator.Scrim">
         <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:statusBarColor">@color/scrim</item>
     </style>
 
     <style name="Base.Automator.Fullscreen">
+        <item name="android:navigationBarColor">@color/scrim</item>
         <item name="android:windowFullscreen">true</item>
     </style>
     <!--Material Alert Dialog Override-->
