@@ -118,7 +118,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
             eventTypes = AccessibilityEvent.TYPE_WINDOWS_CHANGED or AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
             flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
         }
-        log(uiAutomation.serviceInfo)
+        checkResult = Result()
         uiAutomation.setOnAccessibilityEventListener listener@{ event ->
             try {
                 val packageName = event.packageName?.toString() ?: return@listener
@@ -134,20 +134,24 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
                 //ignore the host app
                 if (packageName == APPLICATION_ID) return@listener
                 //start checking
-                checkSource(source, monitorResult.apply { reset() }, true)
+                checkSource(source, checkResult.apply { reset() }, true)
                 //to avoid repeated increments, increment only when distinct
-                if (monitorResult.passed && distinct) {
+                if (checkResult.passed && distinct) {
                     skippingCount++
                     distinct = false
-                    records.putResult(monitorResult)
+                    records.putResult(checkResult)
                 }
                 //should dump result after incrementing skipping count, cuz we need to
                 //dump the latest count
-                if (monitorResult.getReason() != Result.REASON_ILLEGAL_TARGET) {
-                    dumpResult(monitorResult, true)
+                if (checkResult.getReason() != Result.REASON_ILLEGAL_TARGET) {
+                    //dump only when the result is distinct
+                    if (lastResultHash != checkResult.hashCode()) {
+                        dumpResult(checkResult, true)
+                        lastResultHash = checkResult.hashCode()
+                    }
                 }
             } catch (t: Throwable) {
-                monitorResult.maskReason(Result.REASON_ERROR)
+                checkResult.maskReason(Result.REASON_ERROR)
                 dumpError(t)
             } finally {
                 event.recycle()
@@ -208,14 +212,12 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     /**
      * A result instance for monitoring to avoid frequent object allocations.
      */
-    private val monitorResult by lazy {
-        Result()
-    }
+    private lateinit var checkResult: Result
 
-    private val standaloneResult by lazy {
-        Result()
-    }
-
+    /**
+     * The hashcode record of the last check [Result].
+     */
+    private var lastResultHash = -1
 
     /**
      * Launch a standalone check.
@@ -224,6 +226,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
      */
     override fun standaloneCheck(listener: OnCheckResultListener) {
         handler.post {
+            val standaloneResult = Result()
             try {
                 uiAutomation.rootInActiveWindow.findAccessibilityNodeInfosByText("跳过").forEach {
                     checkSource(it, standaloneResult.apply { reset() }, false)
@@ -233,7 +236,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
                 standaloneResult.maskReason(Result.REASON_ERROR)
             } finally {
                 //dump the result before calling the listener, cuz a marshall of result would
-                // recycle the node, hence, we could not dump it any more.
+                //recycle the node, hence, we could not dump it any more.
                 dumpResult(standaloneResult, !standaloneResult.passed)
                 listener.onCheckResult(standaloneResult)
             }
@@ -281,6 +284,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     }
 
     private fun checkNode(node: AccessibilityNodeInfo, result: Result, inject: Boolean) {
+        result.nodeHash = node.hashCode()
         if (!node.isVisibleToUser) {
             result.maskReason(Result.REASON_INVISIBLE)
             return
@@ -314,7 +318,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     }
 
     private fun checkText(text: CharSequence, result: Result): Boolean {
-        result.text = text.toString()
+        result.text = text.trim().toString()
         if (text.length > 6) {
             result.maskReason(Result.REASON_ILLEGAL_TEXT or Result.REASON_MASK_TRANSVERSE)
             return false

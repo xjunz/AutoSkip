@@ -9,7 +9,7 @@ import android.os.Parcelable
  */
 data class Result(
     var passed: Boolean = false, var maskedReason: Int = 0, var pkgName: String? = null, var text: String? = null,
-    var bounds: Rect? = null, var parentBounds: Rect? = null, var portrait: Boolean? = null,
+    var bounds: Rect? = null, var parentBounds: Rect? = null, var portrait: Boolean? = null, var nodeHash: Int = -1
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -19,7 +19,8 @@ data class Result(
         parcel.readString(),
         parcel.readParcelable(Rect::class.java.classLoader),
         parcel.readParcelable(Rect::class.java.classLoader),
-        parcel.readByte() != 0.toByte()
+        parcel.readValue(Boolean::class.java.classLoader) as? Boolean,
+        parcel.readInt()
     )
 
     fun getReason() = maskedReason and REASON_MASK_PARENT.inv() and REASON_MASK_PORTRAIT.inv()
@@ -49,6 +50,7 @@ data class Result(
             .append("; \nbounds=$bounds")
             .append("; parentBounds=$parentBounds")
             .append("; portrait=$portrait")
+            .append("; nodeHash=$nodeHash")
         return sb.toString()
     }
 
@@ -89,6 +91,29 @@ data class Result(
         bounds = null
         parentBounds = null
         portrait = null
+        nodeHash = -1
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Result
+
+        if (passed != other.passed) return false
+        if (maskedReason != other.maskedReason) return false
+        if (text != other.text) return false
+        if (nodeHash != other.nodeHash) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = passed.hashCode()
+        result += maskedReason
+        result = 31 * result + (text?.hashCode() ?: 0)
+        result = 31 * result + nodeHash
+        return result
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -98,7 +123,8 @@ data class Result(
         parcel.writeString(text)
         parcel.writeParcelable(bounds, flags)
         parcel.writeParcelable(parentBounds, flags)
-        parcel.writeByte(if (portrait == true) 1 else 0)
+        parcel.writeValue(portrait)
+        parcel.writeInt(nodeHash)
     }
 
     override fun describeContents(): Int {
@@ -119,6 +145,7 @@ data class Result(
         const val REASON_ERROR = 1 shl 11
         const val INJECTION_ACTION = 7
         const val INJECTION_EVENT = 11
+
         override fun createFromParcel(parcel: Parcel): Result {
             return Result(parcel)
         }
