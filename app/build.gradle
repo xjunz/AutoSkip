@@ -35,8 +35,8 @@ android {
         applicationId "top.xjunz.automator"
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 4
-        versionName "1.1.0"+ ".r" + refine
+        versionCode 5
+        versionName "1.1.1"+ ".r" + refine
         if(gradle.startParameter.taskNames.any{it.toLowerCase().contains("debug")}){
             versionName+="-debug"
         }
