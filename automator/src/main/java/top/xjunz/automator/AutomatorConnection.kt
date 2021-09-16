@@ -1,9 +1,9 @@
 package top.xjunz.automator
 
-import `$android`.app.UiAutomation
-import `$android`.app.UiAutomationConnection
-import `$android`.hardware.input.InputManager
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.app.UiAutomation
+import android.app.UiAutomationConnection
+import android.app.UiAutomationHidden
 import android.content.pm.IPackageManager
 import android.graphics.Rect
 import android.os.*
@@ -15,6 +15,7 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import dev.rikka.tools.refine.Refine
 import rikka.shizuku.SystemServiceHelper
 import top.xjunz.automator.model.Result
 import top.xjunz.automator.util.Records
@@ -40,7 +41,10 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         const val MAX_RECORD_COUNT: Short = 500
     }
 
-    private var uiAutomation: UiAutomation
+    private lateinit var uiAutomationHidden: UiAutomationHidden
+    private val uiAutomation by lazy {
+        Refine.unsafeCast<UiAutomation>(uiAutomationHidden)
+    }
     private val handlerThread = HandlerThread("AutomatorHandlerThread")
     private val handler by lazy {
         Handler(handlerThread.looper)
@@ -62,8 +66,8 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
             log("========Start Connecting========")
             log(sayHello())
             handlerThread.start()
-            uiAutomation = UiAutomation(handlerThread.looper, UiAutomationConnection())
-            uiAutomation.connect(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
+            uiAutomationHidden = UiAutomationHidden(handlerThread.looper, UiAutomationConnection())
+            uiAutomationHidden.connect(UiAutomationHidden.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
             log("The UiAutomation is connected at ${formatCurrentTime()}")
         } catch (t: Throwable) {
             dumpError(t)
@@ -246,20 +250,19 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     override fun getRecords() = records.asList()
 
     /**
-     * Inject a mock finger click event via [InputManager] into a specific [rect], corresponding
-     * to [Result.INJECTION_EVENT].
+     * Inject a mock finger click event via [UiAutomation.injectInputEvent] into a specific [rect],
+     * corresponding to [Result.INJECTION_EVENT].
      */
     private fun injectFingerClickEvent(rect: Rect) {
-        val im = InputManager.getInstance()
         val downTime = SystemClock.uptimeMillis()
         val downAction = MotionEvent.obtain(
             downTime, downTime, MotionEvent.ACTION_DOWN,
             rect.exactCenterX(), rect.exactCenterY(), 0
         )
         downAction.source = InputDevice.SOURCE_TOUCHSCREEN
-        im.injectInputEvent(downAction, 2)
+        uiAutomation.injectInputEvent(downAction, true)
         val upAction = MotionEvent.obtain(downAction).apply { action = MotionEvent.ACTION_UP }
-        im.injectInputEvent(upAction, 2)
+        uiAutomation.injectInputEvent(upAction, true)
         upAction.recycle()
         downAction.recycle()
     }
@@ -433,7 +436,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
 
     override fun destroy() {
         try {
-            uiAutomation.disconnect()
+            uiAutomationHidden.disconnect()
         } catch (t: Throwable) {
             dumpError(t)
         } finally {

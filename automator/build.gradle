@@ -31,10 +31,12 @@ android {
 dependencies {
     compileOnly project('hidden-apis')
     def shizuku_version = '12.0.0'
+    implementation 'androidx.test.uiautomator:uiautomator:2.2.0'
     implementation "dev.rikka.shizuku:api:$shizuku_version"
     implementation "dev.rikka.shizuku:provider:$shizuku_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    implementation "dev.rikka.tools.refine:runtime:3.0.3"
 }

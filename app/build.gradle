@@ -2,13 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
-    id 'dev.rikka.tools.hidden-api-refine'
-}
-hiddenApiRefine {
-    // Prefix to remove, default is ['$']
-    refinePrefix = ['$']
-    // Print log, default is true
-    log = true
+    id 'dev.rikka.tools.refine.gradle-plugin'
 }
 
 int incrementRefine() {

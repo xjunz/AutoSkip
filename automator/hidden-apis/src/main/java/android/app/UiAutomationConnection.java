@@ -1,6 +1,4 @@
-package $android.app;
-
-import android.app.IUiAutomationConnection;
+package android.app;
 
 /**
  * @author xjunz 2021/6/23 0:52

@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id 'dev.rikka.tools.refine.gradle-plugin'
 }
 
 android {
@@ -29,4 +30,6 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    annotationProcessor 'dev.rikka.tools.refine:annotation-processor:3.0.3'
+    compileOnly 'dev.rikka.tools.refine:annotation:3.0.3'
 }
