@@ -67,7 +67,12 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
             log(sayHello())
             handlerThread.start()
             uiAutomationHidden = UiAutomationHidden(handlerThread.looper, UiAutomationConnection())
-            uiAutomationHidden.connect(UiAutomationHidden.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                uiAutomationHidden.connect(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
+            } else {
+                log("Marshmallow don't support FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES")
+                uiAutomationHidden.connect()
+            }
             log("The UiAutomation is connected at ${formatCurrentTime()}")
         } catch (t: Throwable) {
             dumpError(t)
