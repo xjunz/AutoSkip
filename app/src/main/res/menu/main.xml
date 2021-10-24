@@ -17,6 +17,9 @@
             <item
                 android:id="@+id/item_feedback_email"
                 android:title="@string/feedback_email" />
+            <item
+                android:id="@+id/item_feedback_issues"
+                android:title="@string/feedback_issues" />
         </menu>
     </item>
     <item
