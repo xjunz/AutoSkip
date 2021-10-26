@@ -132,6 +132,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     R.id.item_feedback_group -> viewUrl(this@MainActivity, FEEDBACK_GROUP_URL)
+                    R.id.item_feedback_issues -> viewUrl(this@MainActivity, "https://github.com/xjunz/AutoSkip/issues")
                     R.id.item_about -> AboutFragment().show(supportFragmentManager, "about")
                 }
                 return@setOnMenuItemClickListener true

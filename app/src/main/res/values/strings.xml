@@ -81,5 +81,6 @@
     <string name="no_log">无日志</string>
     <string name="feedback_group">加群</string>
     <string name="feedback_email">邮件</string>
+    <string name="feedback_issues">Issues</string>
     <string name="night_mode">夜间模式</string>
 </resources>
