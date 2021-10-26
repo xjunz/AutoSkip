@@ -16,6 +16,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import rikka.shizuku.Shizuku
+import rikka.shizuku.ShizukuProvider.MANAGER_APPLICATION_ID
 import rikka.sui.Sui
 import top.xjunz.automator.*
 import top.xjunz.automator.app.*
@@ -228,7 +229,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun launchShizukuManager() {
-        packageManager.getLaunchIntentForPackage(SHIZUKU_PACKAGE_NAME)?.let {
+        packageManager.getLaunchIntentForPackage(MANAGER_APPLICATION_ID)?.let {
             startActivity(it)
         }
     }

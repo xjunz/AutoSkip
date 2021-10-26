@@ -6,17 +6,17 @@ import android.content.pm.PackageManager
 import android.system.Os
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuBinderWrapper
+import rikka.shizuku.ShizukuProvider.MANAGER_APPLICATION_ID
 import rikka.shizuku.SystemServiceHelper
 import rikka.sui.Sui
 import top.xjunz.automator.BuildConfig
 import top.xjunz.automator.app.AutomatorApp
-import top.xjunz.automator.util.SHIZUKU_PACKAGE_NAME
 
 /**
  * @author xjunz 2021/8/16
  */
 private val shizukuAutoStartComponentName by lazy {
-    ComponentName(SHIZUKU_PACKAGE_NAME, "moe.shizuku.manager.starter.BootCompleteReceiver")
+    ComponentName(MANAGER_APPLICATION_ID, "moe.shizuku.manager.starter.BootCompleteReceiver")
 }
 private val myAutoStartComponentName by lazy {
     ComponentName(BuildConfig.APPLICATION_ID, AutoStarter::class.java.name)
