@@ -191,6 +191,38 @@
                 </RelativeLayout>
 
                 <RelativeLayout
+                    android:id="@+id/rl_m_restriction"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:background="@drawable/bg_option_frame"
+                    android:padding="16dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tv_title_m_restriction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/m_restriction"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                        android:textColor="?colorError" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_title_m_restriction"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="@dimen/spacing_unit"
+                        android:letterSpacing=".05"
+                        android:lineSpacingExtra="1dp"
+                        android:movementMethod="@{LinkMovementMethod.getInstance()}"
+                        android:text="@string/intro_m_restriction"
+                        android:textColor="?colorError"
+                        android:typeface="monospace" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_unit"
