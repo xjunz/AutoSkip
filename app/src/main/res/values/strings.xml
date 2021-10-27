@@ -4,6 +4,9 @@
     <string name="activate_via_shizuku">使用<b> Shizuku </b>激活</string>
     <string name="intro_to_shizuku">本服务需要Shizuku的授权才能正常使用，如果您已安装<a href="https://github.com/RikkaApps/Sui">Sui</a>，
         那么也可通过Sui启动。Shizuku是一个安全可信的开源项目，你可以在<a href='https://github.com/RikkaApps/Shizuku'>这里</a>查看源代码和更多详细信息。</string>
+    <string name="m_restriction">在<b> Android 6.0 </b>上的限制</string>
+    <string name="intro_m_restriction">由于系统限制，在Android 6.0中，本应用与无障碍服务冲突。
+        在服务启动之后，无障碍服务将会结束运行；并且在停止服务之后，无障碍服务才会重新启动。</string>
     <string name="more_to_say">本应用专注于帮助您跳过应用的启动广告/宣传页。\n\n
         相比于其他同类产应用，本应用有以下优点：\n\n
         • 不需要您手动开启辅助功能\n
