@@ -13,12 +13,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
+import rikka.shizuku.ShizukuProvider.MANAGER_APPLICATION_ID
 import top.xjunz.automator.AutomatorConnection
 import top.xjunz.automator.BuildConfig
 import top.xjunz.automator.IAutomatorConnection
 import top.xjunz.automator.OnCheckResultListener
 import top.xjunz.automator.model.Record
-import top.xjunz.automator.util.SHIZUKU_PACKAGE_NAME
 import java.io.FileInputStream
 import java.util.*
 import java.util.concurrent.TimeoutException
@@ -97,7 +97,7 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
      */
     fun syncShizukuInstallationState() {
         isInstalled.value = runCatching {
-            app.packageManager.getApplicationInfo(SHIZUKU_PACKAGE_NAME, PackageManager.GET_UNINSTALLED_PACKAGES)
+            app.packageManager.getApplicationInfo(MANAGER_APPLICATION_ID, PackageManager.GET_UNINSTALLED_PACKAGES)
         }.isSuccess
     }
 
