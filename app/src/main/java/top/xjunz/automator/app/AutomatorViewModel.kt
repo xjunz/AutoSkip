@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.util.Log
@@ -19,6 +20,7 @@ import top.xjunz.automator.OnCheckResultListener
 import top.xjunz.automator.model.Record
 import top.xjunz.automator.util.SHIZUKU_PACKAGE_NAME
 import java.io.FileInputStream
+import java.util.*
 import java.util.concurrent.TimeoutException
 
 
@@ -117,12 +119,20 @@ class AutomatorViewModel constructor(val app: Application) : AndroidViewModel(ap
         isBinding.value = true
         var bound: Boolean? = null
         withContext(Dispatchers.IO) {
-            Shizuku.newProcess(arrayOf("ps", "-A", "-o", "pid", "-o", "name"), null, "/")
+            val isAboveO = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+            Shizuku.newProcess(if (isAboveO) arrayOf("ps", "-A", "-o", "pid", "-o", "name") else arrayOf("ps"), null, "/")
                 .apply {
                     inputStream.bufferedReader().useLines { sequence ->
                         sequence.forEach { line ->
                             if (line.endsWith(serviceName)) {
-                                val pid = line.trimIndent().split(" ")[0]
+                                val pid = if (isAboveO) {
+                                    line.trimIndent().split(" ")[0]
+                                } else {
+                                    StringTokenizer(line, " ").run {
+                                        nextToken()
+                                        nextToken()
+                                    }
+                                }
                                 if (bound == null) {
                                     bound = bindServiceLocked()
                                     if (bound != true) {
