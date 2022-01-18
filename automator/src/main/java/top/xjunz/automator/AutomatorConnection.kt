@@ -39,6 +39,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         private const val APPLICATION_ID = "top.xjunz.automator"
         const val TAG = "automator"
         const val MAX_RECORD_COUNT: Short = 500
+        val SKIP_KEYWORD:Array<String> = arrayOf("跳过", "skip")
     }
 
     private lateinit var uiAutomationHidden: UiAutomationHidden
@@ -237,7 +238,11 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         handler.post {
             val standaloneResult = Result()
             try {
-                uiAutomation.rootInActiveWindow.findAccessibilityNodeInfosByText("跳过").forEach {
+                val possibleAccessibilityNodeInfo:MutableList<AccessibilityNodeInfo> = mutableListOf()
+                SKIP_KEYWORD.forEach {
+                    possibleAccessibilityNodeInfo.addAll(uiAutomation.rootInActiveWindow.findAccessibilityNodeInfosByText(it))
+                }
+                possibleAccessibilityNodeInfo.forEach {
                     checkSource(it, standaloneResult.apply { reset() }, false)
                 }
             } catch (t: Throwable) {
@@ -282,7 +287,11 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
      */
     private fun checkSource(source: AccessibilityNodeInfo, result: Result, inject: Boolean) {
         result.pkgName = source.packageName.toString()
-        source.findAccessibilityNodeInfosByText("跳过").run {
+        val possibleAccessibilityNodeInfo:MutableList<AccessibilityNodeInfo> = mutableListOf()
+        SKIP_KEYWORD.forEach {
+            possibleAccessibilityNodeInfo.addAll(source.findAccessibilityNodeInfosByText(it))
+        }
+        possibleAccessibilityNodeInfo.run {
             when (size) {
                 0 -> result.maskReason(Result.REASON_ILLEGAL_TARGET or Result.REASON_MASK_PORTRAIT)
                 1 -> checkNode(first(), result, inject)
@@ -327,7 +336,7 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
 
     private fun checkText(text: CharSequence, result: Result): Boolean {
         result.text = text.trim().toString()
-        if (text.length > 6) {
+        if (text.length > 10) {
             result.maskReason(Result.REASON_ILLEGAL_TEXT or Result.REASON_MASK_TRANSVERSE)
             return false
         }
@@ -339,14 +348,14 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
     }
 
     private fun checkRegion(nodeRect: Rect, windowRect: Rect, result: Result): Boolean {
-        if (/*nodeRect.exactCenterX() > windowRect.width() / 4f &&*/ nodeRect.exactCenterX() < windowRect.width() / 4f * 3) {
+        if (/*nodeRect.exactCenterX() > windowRect.width() / 4f &&*/ nodeRect.exactCenterX() < windowRect.width() / 3f * 2) {
             result.maskReason(Result.REASON_ILLEGAL_LOCATION or Result.REASON_MASK_TRANSVERSE)
             return false
         }
-        if (nodeRect.exactCenterY() > windowRect.height() / 4f && nodeRect.exactCenterY() < windowRect.height() / 3f * 2) {
-            result.maskReason(Result.REASON_ILLEGAL_LOCATION or Result.REASON_MASK_PORTRAIT)
-            return false
-        }
+//        if (nodeRect.exactCenterY() > windowRect.height() / 4f && nodeRect.exactCenterY() < windowRect.height() / 3f * 2) {
+//            result.maskReason(Result.REASON_ILLEGAL_LOCATION or Result.REASON_MASK_PORTRAIT)
+//            return false
+//        }
         return true
     }
 
