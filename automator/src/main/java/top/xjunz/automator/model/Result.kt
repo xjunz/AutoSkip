@@ -69,6 +69,7 @@ data class Result(
                 REASON_ILLEGAL_LOCATION -> "illegal location"
                 REASON_ILLEGAL_TARGET -> "illegal target"
                 REASON_INVISIBLE -> "invisible"
+                REASON_EDITABLE -> "editable"
                 REASON_ERROR -> "error"
                 REASON_NONE -> "none"
                 else -> throw IllegalArgumentException("no such reason: " + getReason().toString(2))
@@ -141,6 +142,7 @@ data class Result(
         const val REASON_ILLEGAL_LOCATION = 1 shl 2
         const val REASON_INVISIBLE = 1 shl 3
         const val REASON_ILLEGAL_TEXT = 1 shl 4
+        const val REASON_EDITABLE = 1 shl 5
         const val REASON_ILLEGAL_TARGET = 1 shl 10
         const val REASON_ERROR = 1 shl 11
         const val INJECTION_ACTION = 7

@@ -242,7 +242,9 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
                 SKIP_KEYWORD.forEach {
                     possibleAccessibilityNodeInfo.addAll(uiAutomation.rootInActiveWindow.findAccessibilityNodeInfosByText(it))
                 }
-                possibleAccessibilityNodeInfo.forEach {
+                for(it in possibleAccessibilityNodeInfo) {
+                    // skip the EditText
+                    if(it.isEditable) continue
                     checkSource(it, standaloneResult.apply { reset() }, false)
                 }
             } catch (t: Throwable) {
@@ -304,6 +306,10 @@ class AutomatorConnection : IAutomatorConnection.Stub() {
         result.nodeHash = node.hashCode()
         if (!node.isVisibleToUser) {
             result.maskReason(Result.REASON_INVISIBLE)
+            return
+        }
+        if (node.isEditable){
+            result.maskReason(Result.REASON_EDITABLE)
             return
         }
         if (!checkText(node.text, result)) return
