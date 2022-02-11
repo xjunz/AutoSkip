@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -8,8 +9,7 @@
             type="top.xjunz.automator.test.TestActivity" />
     </data>
 
-    <top.xjunz.automator.test.TestLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <top.xjunz.automator.test.TestLayout
         android:id="@+id/test_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -93,7 +93,23 @@
                     android:layout_marginTop="@dimen/spacing_unit"
                     android:max="100"
                     android:onProgressChanged="@{(v,p,f)->testLayout.adjustTargetHeight((float)p/v.max)}" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="@dimen/spacing_unit"
+                    android:hint="@string/text"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:afterTextChanged="@{(t)->skipTarget.setText(t.toString())}"
+                        android:text="@string/skip"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
             </androidx.appcompat.widget.LinearLayoutCompat>
+
 
 
         </com.google.android.material.card.MaterialCardView>

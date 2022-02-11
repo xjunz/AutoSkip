@@ -39,6 +39,7 @@ class TestActivity : AppCompatActivity() {
                             Result.REASON_ILLEGAL_LOCATION -> getString(R.string.illegal_location)
                             Result.REASON_ILLEGAL_SIZE -> getString(R.string.illegal_size)
                             Result.REASON_ERROR -> getString(R.string.error)
+                            Result.REASON_NONE -> getString(R.string.cannot_find)
                             else -> getString(R.string.unknown_problem)
                         }
                     }

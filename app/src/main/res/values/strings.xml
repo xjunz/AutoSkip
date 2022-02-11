@@ -46,6 +46,7 @@
     <string name="test_not_ok">测试失败</string>
     <string name="illegal_location">非法位置</string>
     <string name="illegal_size">非法大小</string>
+    <string name="cannot_find">未找到元素</string>
     <string name="error">错误</string>
     <string name="unknown_problem">未知问题</string>
     <string name="icon">图标</string>
@@ -86,4 +87,5 @@
     <string name="feedback_email">邮件</string>
     <string name="feedback_issues">Issues</string>
     <string name="night_mode">夜间模式</string>
+    <string name="text">文本</string>
 </resources>
